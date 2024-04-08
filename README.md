@@ -9,3 +9,5 @@
 - **Multiplataforma:** Funciona em qualquer dispositivo com suporte para aplicativos web progressivos (PWA).
 - **Segurança:** Construído sobre o protocolo XMPP, conhecido por sua segurança e flexibilidade.
 - **Personalizável:** Temas e interfaces facilmente ajustáveis para atender às suas preferências ou identidade visual.
+
+![Logo do VIBE Chat](/logo.jpg)
