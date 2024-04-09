@@ -25,7 +25,7 @@ export class StorageService {
     localStorage.setItem(key, valueToStore);
   }
 
-  getItem<T>(key: string): T | null | any {
+  getItem<T>(key: string): T | null {
     const item = localStorage.getItem(key);
     if (!item) return null;
 
@@ -40,7 +40,7 @@ export class StorageService {
     try {
       return JSON.parse(valueToReturn) as T;
     } catch {
-      return valueToReturn;
+      return valueToReturn as T;
     }
   }
 

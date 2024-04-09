@@ -11,7 +11,7 @@ export class UserPreferenceService {
     this.storageService.setItem(`preferences_${key}`, value, true);
   }
 
-  getPreference(key: string): string | null {
+  getPreference<T>(key: string): T | null {
     return this.storageService.getItem(`preferences_${key}`);
   }
 
