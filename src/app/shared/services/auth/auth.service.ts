@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable, catchError, of, switchMap } from 'rxjs';
 import { XmppService } from '../xmpp/xmpp.service';
 import { UserPreferenceService } from '../user-preference/user-preference.service';
 import { LoginModel } from '../../models/login.model';
+import { PreferencesKey } from '../../enums/preferences.enun';
 
 @Injectable({
   providedIn: 'root'
@@ -11,26 +12,31 @@ export class AuthService {
   private xmppService = inject(XmppService);
   private userPreference = inject(UserPreferenceService);
 
-  private preferenceKey = 'uc';
+  private preferenceKey = PreferencesKey.UserCredentials;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.checkAutoLogin();
   }
 
-  login(server: string, username: string, password: string, rememberMe: boolean, autoLogin: boolean): Observable<boolean> {
-    if (rememberMe) {
-      this.userPreference.setPreference(this.preferenceKey, { server, username, password, rememberMe, autoLogin });
-    } else {
-      this.userPreference.removePreference(this.preferenceKey);
-    }
-
-    return this.xmppService.connect(`wss://${server}:7443/ws`, server, `${username}@${server}`, password).pipe(
+  login(userCredentials: LoginModel): Observable<boolean> {
+    return this.xmppService.connect(`wss://${userCredentials.server}:7443/ws`, userCredentials.server, `${userCredentials.username}@${userCredentials.server}`, userCredentials.password).pipe(
       switchMap(() => {
         this.isAuthenticatedSubject.next(true);
+
+        if (userCredentials.rememberMe && userCredentials.autoLogin) {
+          this.userPreference.setPreference(this.preferenceKey, userCredentials);
+        } else if (userCredentials.rememberMe){
+          userCredentials.password = '';
+          this.userPreference.setPreference(this.preferenceKey, userCredentials);
+        } else {
+          this.userPreference.removePreference(this.preferenceKey);
+        }
+
         return of(true);
       }),
       catchError(error => {
+        this.xmppService.disconnect();
         this.isAuthenticatedSubject.next(false);
         return of(false);
       })
@@ -40,7 +46,7 @@ export class AuthService {
   private checkAutoLogin(): void {
     const userCredentials = this.userPreference.getPreference<LoginModel>(this.preferenceKey);
     if (userCredentials && userCredentials.autoLogin) {
-      this.login(userCredentials.server, userCredentials.username, userCredentials.password, true, true).subscribe();
+      this.login(userCredentials).subscribe();
     }
   }
 
