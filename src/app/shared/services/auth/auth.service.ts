@@ -28,7 +28,6 @@ export class AuthService {
         return of(true);
       }),
       catchError(error => {
-        console.error('Erro na conexão XMPP:', error);
         this.isAuthenticatedSubject.next(false);
         return of(false);
       })
