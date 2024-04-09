@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, of, switchMap } from 'rxjs';
 import { XmppService } from '../xmpp/xmpp.service';
 import { UserPreferenceService } from '../user-preference/user-preference.service';
@@ -8,10 +8,13 @@ import { LoginModel } from '../../models/login.model';
   providedIn: 'root'
 })
 export class AuthService {
+  private xmppService = inject(XmppService);
+  private userPreference = inject(UserPreferenceService);
+
   private preferenceKey = 'uc';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
-  constructor(private xmppService: XmppService, private userPreference: UserPreferenceService) {
+  constructor() {
     this.checkAutoLogin();
   }
 

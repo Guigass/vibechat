@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { xml } from '@xmpp/client';
 import { ReplaySubject, filter, take, timer, map, from, catchError, of, retry } from 'rxjs';
@@ -8,10 +8,12 @@ import { XmppServicesModel } from '../../models/xmpp-services.model';
   providedIn: 'root'
 })
 export class XmppServicesService {
+  private xmppService = inject(XmppService);
+
   private servicesSource = new ReplaySubject<XmppServicesModel[]>(1); // 1 indica que ele vai reter o último valor
   public services$ = this.servicesSource.asObservable();
 
-  constructor(private xmppService: XmppService) {
+  constructor() {
     if (this.xmppService.isConnected) {
       this.discoverServices();
     } else {

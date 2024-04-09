@@ -9,8 +9,6 @@ export class StorageService {
   private secretKey = environment.storageEncryptionKey;
   private prefix = 'e:';
 
-  constructor() {}
-
   setItem(key: string, value: any, encrypt = false): void {
     let valueToStore = value;
 

@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { StorageService } from '../storage/storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserPreferenceService {
-  constructor(private storageService: StorageService) {}
+  private storageService = inject(StorageService);
 
   setPreference(key: string, value: any): void {
     this.storageService.setItem(`preferences_${key}`, value, true);

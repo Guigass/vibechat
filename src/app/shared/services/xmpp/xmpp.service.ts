@@ -29,9 +29,6 @@ export class XmppService {
 
   public isConnected = false;
 
-  constructor() {
-  }
-
   connect(service: string, domain: string, username: string, password: string) {
     this.domain = domain;
 
