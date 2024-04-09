@@ -81,4 +81,12 @@ export class XmppService {
 
     return from(this.xmpp.send(stanza));
   }
+
+  sendIq(stanza: any) {
+    if (!this.isConnected) {
+      return from(Promise.reject('Not connected'));
+    }
+
+    return from(this.xmpp.iqCaller.request(stanza));
+  }
 }
