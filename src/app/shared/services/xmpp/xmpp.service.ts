@@ -9,10 +9,22 @@ export class XmppService {
 
   private xmpp!: Client;
 
-  public onStanza = new BehaviorSubject<any>(null);
-  public onOnline = new BehaviorSubject<any>(null);
-  public onOffline = new BehaviorSubject<any>(null);
-  public onError = new BehaviorSubject<any>(null);
+  private onStanza = new BehaviorSubject<any>(null);
+  get onStanza$() {
+    return this.onStanza.asObservable();
+  }
+  private onOnline = new BehaviorSubject<any>(null);
+  get onOnline$() {
+    return this.onOnline.asObservable();
+  }
+  private onOffline = new BehaviorSubject<any>(null);
+  get onOffline$() {
+    return this.onOffline.asObservable();
+  }
+  private onError = new BehaviorSubject<any>(null);
+  get onError$() {
+    return this.onError.asObservable();
+  }
 
   public isConnected = false;
 
