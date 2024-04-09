@@ -1,0 +1,24 @@
+<!-- <ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>app</ion-title>
+  </ion-toolbar>
+</ion-header> -->
+
+<ion-content>
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">app</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-menu>
+    <ion-content>
+      <app-aside></app-aside>
+    </ion-content>
+  </ion-menu>
+
+  <div>
+    <ion-router-outlet></ion-router-outlet>
+  </div>
+  <app-tabs></app-tabs>
+</ion-content>
