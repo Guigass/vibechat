@@ -1,0 +1,16 @@
+.page{
+  --background: #fff9eb;
+  background-position: center;
+  background-size: contain;
+
+}
+.card{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  top: 25%;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
