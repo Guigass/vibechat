@@ -1,27 +1,28 @@
 import { Injectable } from '@angular/core';
 import { Client, client, xml } from '@xmpp/client';
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject, Subject, filter, from, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class XmppService {
+  public domain!: string;
 
   private xmpp!: Client;
 
-  private onStanza = new BehaviorSubject<any>(null);
+  private onStanza = new Subject<any>();
   get onStanza$() {
     return this.onStanza.asObservable();
   }
-  private onOnline = new BehaviorSubject<any>(null);
+  private onOnline = new Subject<any>();
   get onOnline$() {
     return this.onOnline.asObservable();
   }
-  private onOffline = new BehaviorSubject<any>(null);
+  private onOffline = new Subject<any>();
   get onOffline$() {
     return this.onOffline.asObservable();
   }
-  private onError = new BehaviorSubject<any>(null);
+  private onError = new Subject<any>();
   get onError$() {
     return this.onError.asObservable();
   }
@@ -32,17 +33,21 @@ export class XmppService {
   }
 
   connect(service: string, domain: string, username: string, password: string) {
+    this.domain = domain;
+
     this.xmpp = client({
       service: service,
       domain: domain,
       username: username,
       password: password,
-      resource: 'vibe-chat',
+      resource: 'vibe-chat'
     });
 
     this.xmpp.on('online', (address) => {
       this.isConnected = true;
+
       this.xmpp.send(xml("presence"));
+
       this.onOnline.next(address);
     });
 
@@ -53,7 +58,9 @@ export class XmppService {
     });
 
     this.xmpp.on('stanza', (stanza) => {
-      this.onStanza.next(stanza);
+      if (stanza) {
+        this.onStanza.next(stanza);
+      }
     });
 
     this.xmpp.on('error', (err) => {

@@ -2,7 +2,8 @@ import { xml } from '@xmpp/client';
 import { Injectable } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
-import { NEVER, Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
+import {  Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
+import { MessageModel } from '../../models/message.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,12 +21,19 @@ export class ChatService {
     );
   }
 
-  onMessageFromUser(from: string): Observable<any> {
+  onMessageFromUser(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('message')), 
       filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       filter(stanza => stanza.attrs.from.split('/')[0] === from),
-      map(stanza => stanza.getChildText('body')));
+      map(stanza => {
+        const body = stanza.getChildText('body');
+        const timestamp = new Date();
+        const messageId = stanza.attrs.id;
+        const type = 'received';
+
+        return new MessageModel(from, stanza.attrs.to, body, timestamp, messageId, type);
+      }));
   }
 
   isUserTyping(from: string): Observable<boolean> {
@@ -42,12 +50,12 @@ export class ChatService {
         } else if (stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')) {
           return of(false); 
         }
-        return NEVER;
+        return of(false);
       }),
       distinctUntilChanged());
   }
 
-  requestMessagesHistory(from: string, maxMessages: number, before?: string): Observable<any> {
+  requestMessagesHistory(from: string, maxMessages: number, before?: string): Observable<void> {
     const mamQuery = xml(
       'iq',
       { type: 'set', id: 'mam-query' },
@@ -70,7 +78,7 @@ export class ChatService {
     return this.xmppService.sendStanza(mamQuery);
   }
 
-  getMessagesHistory(from: string): Observable<any> {
+  getMessagesHistory(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
       // Filtra para processar apenas mensagens relevantes
       filter(stanza =>
@@ -82,13 +90,13 @@ export class ChatService {
         const forwarded = result.getChild('forwarded', 'urn:xmpp:forward:0');
         const message = forwarded.getChild('message', 'jabber:client');
         const delay = forwarded.getChild('delay', 'urn:xmpp:delay');
-        const timestamp = delay.attrs.stamp;
+        const timestamp = new Date(delay.attrs.stamp);
         const body = message.getChildText('body');
         const messageId = result.attrs.id;
   
         const type = message.attrs.from.includes(from) ? 'received' : 'sent';
-  
-        return { timestamp, body, type, messageId };
+
+        return new MessageModel(from, message.attrs.to, body, timestamp, messageId, type);
       })
     );
   }
