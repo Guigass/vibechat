@@ -71,7 +71,7 @@ export class XmppService {
   }
 
   disconnect() {
-    return from(this.xmpp.stop());
+    return from(this.xmpp.disconnect());
   }
 
   sendStanza(stanza: any) {
