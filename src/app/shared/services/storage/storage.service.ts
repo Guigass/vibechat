@@ -1,29 +1,47 @@
 import { Injectable } from '@angular/core';
+import * as CryptoJS from 'crypto-js';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StorageService {
+  private secretKey = environment.storageEncryptionKey;
+  private prefix = 'e:';
+
   constructor() {}
 
-  setItem(key: string, value: any): void {
+  setItem(key: string, value: any, encrypt = false): void {
+    let valueToStore = value;
+
     if (typeof value === 'object') {
-      localStorage.setItem(key, JSON.stringify(value));
-    } else {
-      localStorage.setItem(key, value);
+      valueToStore = JSON.stringify(value);
     }
+
+    if (encrypt) {
+      valueToStore = this.prefix + CryptoJS.AES.encrypt(JSON.stringify(value), this.secretKey).toString();
+    }
+
+    localStorage.setItem(key, valueToStore);
   }
 
-  getItem<T>(key: string): T | string | null {
+  getItem<T>(key: string): T | null | any {
     const item = localStorage.getItem(key);
-    if (item) {
-      try {
-        return JSON.parse(item) as T;
-      } catch {
-        return item;
-      }
+    if (!item) return null;
+
+    let valueToReturn = item;
+    if (item.startsWith(this.prefix)) {
+      valueToReturn = item.slice(this.prefix.length);
+
+      const decryptedBytes = CryptoJS.AES.decrypt(valueToReturn, this.secretKey);
+      valueToReturn = decryptedBytes.toString(CryptoJS.enc.Utf8);
     }
-    return null;
+
+    try {
+      return JSON.parse(valueToReturn) as T;
+    } catch {
+      return valueToReturn;
+    }
   }
 
   removeItem(key: string): void {

@@ -8,7 +8,7 @@ export class UserPreferenceService {
   constructor(private storageService: StorageService) {}
 
   setPreference(key: string, value: any): void {
-    this.storageService.setItem(`preferences_${key}`, value);
+    this.storageService.setItem(`preferences_${key}`, value, true);
   }
 
   getPreference(key: string): string | null {
