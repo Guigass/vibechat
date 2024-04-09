@@ -1,0 +1,11 @@
+ion-card{
+  max-width: 300px;
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  border: 1px solid rgba(8, 8, 8, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+ion-col{
+  margin-bottom: 15px;
+}
