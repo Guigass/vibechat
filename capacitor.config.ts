@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
-  appName: 'vibe-chat',
+  appId: 'com.vibe.chat',
+  appName: 'VibeChat',
   webDir: 'www',
   server: {
     androidScheme: 'https'
