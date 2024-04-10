@@ -38,9 +38,9 @@ export class PresenceService {
         const presenceType = stanza.getChild('show');
         if (presenceType) {
           return { type: presenceType.getText() as PresenceType, jid: jid, status: status };
+        } else {
+          return { type: PresenceType.Offline, jid: jid, status: status };
         }
-
-        return { type: presenceType, status: status, jid: jid};
       })
     );
   }

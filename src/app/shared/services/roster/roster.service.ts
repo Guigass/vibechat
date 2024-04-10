@@ -1,8 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { xml } from '@xmpp/client';
-import { Observable, filter, map } from 'rxjs';
+import { Observable, filter, map, Subscription } from 'rxjs';
 import { ContactGroupModel } from '../../models/contact-group.model';
+import { ContactModel } from '../../models/contact.model';
+import { PresenceModel } from '../../models/presence.model';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -14,15 +17,17 @@ export class RosterService {
     return this.xmppService.sendStanza(xml('iq', { type: 'get' }, xml('query', { xmlns: 'jabber:iq:roster' })));
   }
 
-  getRoster(): Observable<ContactGroupModel[]> {
+  getRosterList(): Observable<ContactGroupModel[]> {
     return this.xmppService.onStanza$.pipe(
-      filter(stanza => stanza.is('iq') && stanza.getChild('query', 'jabber:iq:roster')),
+      filter(stanza => stanza.is('iq') && stanza.attrs.type === 'result' && stanza.getChild('query', 'jabber:iq:roster')),
       map(stanza => {
         const contacts = stanza.getChild('query').getChildren('item').map((item: any) => {
           const jid = item.attrs.jid;
           const name = item.attrs.name;
+          const subscription = item.attrs.subscription;
           const groups = item.getChildren('group').map((group: any) => group.text());
-          return { jid, name, groups };
+          const presence = { type: PresenceType.Offline, status: '', jid: jid } as PresenceModel;
+          return { jid, name, groups, subscription, presence };
         });
 
         const groupsMap = new Map<string, ContactGroupModel>();
@@ -42,6 +47,22 @@ export class RosterService {
         const groupedContacts: ContactGroupModel[] = Array.from(groupsMap.values());
 
         return groupedContacts;
+      })
+    );
+  }
+
+  getTosterUpdate(): Observable<ContactModel> {
+    return this.xmppService.onStanza$.pipe(
+      filter(stanza => stanza.is('iq') && stanza.attrs.type === 'set' && stanza.getChild('query', 'jabber:iq:roster')),
+      map(stanza => {
+        const item = stanza.getChild('query').getChild('item');
+        const jid = item.attrs.jid as string;
+        const name = item.attrs.name as string;
+        const subscription = item.attrs.subscription as string;
+        const groups = item.getChildren('group').map((group: any) => group.text()) as string[];
+        const presence = { type: PresenceType.Offline, status: '', jid: jid } as PresenceModel;
+
+        return { jid, name, groups, subscription, presence};
       })
     );
   }

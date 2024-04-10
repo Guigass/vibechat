@@ -4,5 +4,6 @@ export interface ContactModel {
     jid: string;
     name: string;
     presence: PresenceModel;
+    subscription: string;
     groups: string[];
 }
