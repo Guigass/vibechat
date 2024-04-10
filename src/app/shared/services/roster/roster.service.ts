@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { xml } from '@xmpp/client';
 import { Observable, filter, map } from 'rxjs';
@@ -8,8 +8,7 @@ import { ContactGroupModel } from '../../models/contact-group.model';
   providedIn: 'root'
 })
 export class RosterService {
-
-  constructor(private xmppService: XmppService) { }
+  private xmppService = inject(XmppService);
 
   requestRoster(): Observable<void> {
     return this.xmppService.sendStanza(xml('iq', { type: 'get' }, xml('query', { xmlns: 'jabber:iq:roster' })));

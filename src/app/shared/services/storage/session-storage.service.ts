@@ -5,7 +5,7 @@ import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class StorageService {
+export class SessionStorageService {
   private secretKey = environment.storageEncryptionKey;
   private prefix = 'e:';
 
@@ -20,11 +20,11 @@ export class StorageService {
       valueToStore = this.prefix + CryptoJS.AES.encrypt(JSON.stringify(value), this.secretKey).toString();
     }
 
-    localStorage.setItem(key, valueToStore);
+    sessionStorage.setItem(key, valueToStore);
   }
 
   getItem<T>(key: string): T | null {
-    const item = localStorage.getItem(key);
+    const item = sessionStorage.getItem(key);
     if (!item) return null;
 
     let valueToReturn = item;
@@ -43,10 +43,10 @@ export class StorageService {
   }
 
   removeItem(key: string): void {
-    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
   }
 
   clear(): void {
-    localStorage.clear();
+    sessionStorage.clear();
   }
 }

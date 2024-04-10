@@ -1,5 +1,5 @@
 import { xml } from '@xmpp/client';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
 import {  Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
@@ -9,8 +9,7 @@ import { MessageModel } from '../../models/message.model';
   providedIn: 'root'
 })
 export class ChatService {
-
-  constructor(private xmppService: XmppService) { }
+  private xmppService = inject(XmppService);
 
   sendMessage(message: string, to: string): Observable<any> {
     return this.xmppService.sendStanza(xml('message', { to: to, type: 'chat', id: uuidv4() }, xml('body', {}, message))).pipe(

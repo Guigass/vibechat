@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Client, client, xml } from '@xmpp/client';
-import { BehaviorSubject, Subject, filter, from, take } from 'rxjs';
+import { BehaviorSubject, Subject, filter, from, of, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class XmppService {
   public domain!: string;
-
   private xmpp!: Client;
 
   private onStanza = new Subject<any>();
@@ -29,19 +28,22 @@ export class XmppService {
 
   public isConnected = false;
 
-  constructor() {
-  }
-
   connect(service: string, domain: string, username: string, password: string) {
+    if (this.xmpp && this.xmpp.status !== 'offline') {
+      return of();
+    }
+
     this.domain = domain;
 
-    this.xmpp = client({
+    const loginParams = {
       service: service,
       domain: domain,
       username: username,
       password: password,
       resource: 'vibe-chat'
-    });
+    };
+
+    this.xmpp = client(loginParams);
 
     this.xmpp.on('online', (address) => {
       this.isConnected = true;
