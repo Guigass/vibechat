@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { IonHeader, IonContent, IonSegment, IonSegmentButton, IonLabel, IonToolbar, IonSearchbar } from "@ionic/angular/standalone";
-import { RosterGroupComponent } from '../roster-group/roster-group.component';
-import { RosterUserItemComponent } from '../roster-user-item/roster-user-item.component';
+import { RosterComponent } from '../roster/roster.component';
 
 @Component({
   selector: 'app-aside',
@@ -18,8 +17,7 @@ import { RosterUserItemComponent } from '../roster-user-item/roster-user-item.co
     IonContent,
     IonHeader,
     CommonModule,
-    RosterGroupComponent,
-    RosterUserItemComponent
+    RosterComponent
   ],
 })
 export class AsideComponent  implements OnInit {
