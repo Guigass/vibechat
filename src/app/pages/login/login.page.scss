@@ -1,9 +1,17 @@
 .page{
-  --background: #fff9eb;
+  --background: url('/assets/background/dark.webp') repeat;
   background-position: center;
   background-size: contain;
-
 }
+
+@media (prefers-color-scheme: dark) {
+  .page {
+    background: url('/assets/background/dark.webp') repeat;
+    background-position: center;
+    background-size: contain;
+  }
+}
+
 .card{
   display: flex;
   flex-direction: column;
