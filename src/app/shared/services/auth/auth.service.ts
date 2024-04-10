@@ -1,36 +1,39 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, of, switchMap } from 'rxjs';
+import { BehaviorSubject, NEVER, Observable, catchError, of, switchMap } from 'rxjs';
 import { XmppService } from '../xmpp/xmpp.service';
-import { UserPreferenceService } from '../user-preference/user-preference.service';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
+import { StorageService } from '../storage/storage.service';
+import { SessionStorageService } from '../storage/session-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private xmppService = inject(XmppService);
-  private userPreference = inject(UserPreferenceService);
+  private storageService = inject(StorageService);
+  private sessionStorageService = inject(SessionStorageService);
 
   private preferenceKey = PreferencesKey.UserCredentials;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
-  constructor() {
-    this.checkAutoLogin();
-  }
+  constructor() {}
 
   login(userCredentials: LoginModel): Observable<boolean> {
     return this.xmppService.connect(`wss://${userCredentials.server}:7443/ws`, userCredentials.server, `${userCredentials.username}`, userCredentials.password).pipe(
       switchMap(() => {
-        this.isAuthenticatedSubject.next(true);
+        this.sessionStorageService.setItem(this.preferenceKey, userCredentials, true);
+
+        console.log('userCredentials.rememberMe', userCredentials.rememberMe);
 
         if (userCredentials.rememberMe) {
           const credentialsToSave = userCredentials.autoLogin ? userCredentials : { ...userCredentials, password: '' };
-          this.userPreference.setPreference(this.preferenceKey, credentialsToSave);
+          this.storageService.setItem(this.preferenceKey, credentialsToSave, true);
         } else {
-          this.userPreference.removePreference(this.preferenceKey);
+          this.storageService.removeItem(this.preferenceKey);
         }
         
+        this.isAuthenticatedSubject.next(true);
         return of(true);
       }),
       catchError(error => {
@@ -41,15 +44,24 @@ export class AuthService {
     );
   }
 
-  private checkAutoLogin(): void {
-    const userCredentials = this.userPreference.getPreference<LoginModel>(this.preferenceKey);
-    if (userCredentials && userCredentials.autoLogin) {
-      this.login(userCredentials).subscribe();
+  public checkAutoLogin(): Observable<boolean> {
+    const sessionUserCredentials = this.sessionStorageService.getItem<LoginModel>(this.preferenceKey);
+
+    if (sessionUserCredentials) {
+      return this.login(sessionUserCredentials);
     }
+
+    const userCredentials = this.storageService.getItem<LoginModel>(this.preferenceKey);
+    if (userCredentials && userCredentials.autoLogin) {
+      return this.login(userCredentials);
+    }
+
+    return of();
   }
 
   logout(): void {
     this.xmppService.disconnect();
+    this.sessionStorageService.removeItem(this.preferenceKey);
     this.isAuthenticatedSubject.next(false);
   }
 

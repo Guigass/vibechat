@@ -7,8 +7,9 @@ import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
 import { addIcons } from 'ionicons';
 import { eye, eyeOff } from 'ionicons/icons';
-import { of, switchMap, map, take } from 'rxjs';
+import { of, switchMap, map, take, Observable } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
+import { StorageService } from '../../services/storage/storage.service';
 
 @Component({
   selector: 'app-login-component',
@@ -36,10 +37,9 @@ import { XmppService } from '../../services/xmpp/xmpp.service';
 export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
-  private userPreferenceService = inject(UserPreferenceService);
+  private storageService = inject(StorageService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
-  private loadingCtrl = inject(LoadingController);
 
   loginForm = new FormGroup({
     server: new FormControl('', Validators.required),
@@ -55,6 +55,8 @@ export class LoginComponent implements OnInit {
   loadingMessage = 'Autenticando...';
 
   constructor() {
+    this.processLogin(this.authService.checkAutoLogin())
+    
     addIcons({
       eye,
       eyeOff
@@ -65,12 +67,8 @@ export class LoginComponent implements OnInit {
     this.loadPreferences();
   }
 
-  ionViewDidEnter(){
-    this.loadPreferences();
-  }
-
   loadPreferences(){
-    const preferences = this.userPreferenceService.getPreference<LoginModel>(PreferencesKey.UserCredentials);
+    const preferences = this.storageService.getItem<LoginModel>(PreferencesKey.UserCredentials);
 
     if(preferences?.rememberMe){
       this.loginForm.setValue(preferences);
@@ -81,32 +79,46 @@ export class LoginComponent implements OnInit {
     this.loginForm.markAllAsTouched();
 
     if(this.loginForm.valid) {
-      this.loadingMessage = 'Autenticando...';
-      this.isLoading = true;
-
-      this.authService.login(this.loginForm.value as LoginModel).pipe(
-        switchMap((logged) => {
-          if(!logged){
-            this.presentErrorToast();
-            return of(false);
-          }
-
-          this.loadingMessage = 'Autenticado, Conectando...';
-
-          if (this.xmppService.isConnected) {
-            return of(true);
-          }
-
-          return this.xmppService.onOnline$.pipe(take(1), map(() => true));
-        })
-      ).subscribe((logged) => {
-        if(logged){
-          this.isLoading = false;
-          this.navController.navigateRoot('/home');
-        }
-      });
+      this.processLogin(this.authService.login(this.loginForm.value as LoginModel))
     }
    
+  }
+
+  processLogin(login: Observable<boolean>, autoLogin = false){
+    if (autoLogin) {
+      this.loadingMessage = 'Autenticando...';
+      this.isLoading = true;
+    }
+
+    login.pipe(
+      switchMap((logged) => {
+        if(!logged){
+          this.presentErrorToast();
+
+          this.loadingMessage = 'Ops, deu errado.';
+          this.isLoading = false;
+
+          return of(false);
+        }
+
+        if (autoLogin) {
+          this.isLoading = true;
+        }
+
+        this.loadingMessage = 'Autenticado, Conectando...';
+
+        if (this.xmppService.isConnected) {
+          return of(true);
+        }
+
+        return this.xmppService.onOnline$.pipe(take(1), map(() => true));
+      })
+    ).subscribe((logged) => {
+      if(logged){
+        this.isLoading = false;
+        this.navController.navigateRoot('/home');
+      }
+    });
   }
 
   async presentErrorToast() {
