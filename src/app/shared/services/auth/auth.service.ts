@@ -24,8 +24,6 @@ export class AuthService {
       switchMap(() => {
         this.sessionStorageService.setItem(this.preferenceKey, userCredentials, true);
 
-        console.log('userCredentials.rememberMe', userCredentials.rememberMe);
-
         if (userCredentials.rememberMe) {
           const credentialsToSave = userCredentials.autoLogin ? userCredentials : { ...userCredentials, password: '' };
           this.storageService.setItem(this.preferenceKey, credentialsToSave, true);
