@@ -1,0 +1,15 @@
+@media (prefers-color-scheme: light) {
+    :root {
+        .page {
+            --background: url('/assets/background/light.webp') repeat;
+        }
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        .page {
+            --background: url('/assets/background/dark.webp') repeat;
+        }
+    }
+}

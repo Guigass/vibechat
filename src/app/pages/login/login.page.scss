@@ -1,18 +1,6 @@
-.page{
-  --background: url('/assets/background/dark.webp') repeat;
-  background-position: center;
-  background-size: contain;
-}
 
-@media (prefers-color-scheme: dark) {
-  .page {
-    background: url('/assets/background/dark.webp') repeat;
-    background-position: center;
-    background-size: contain;
-  }
-}
 
-.card{
+.card {
   display: flex;
   flex-direction: column;
   align-items: center;
