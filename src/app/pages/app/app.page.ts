@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonHeader, IonMenu, IonRouterOutlet, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { IonContent, IonHeader, IonMenu, IonRouterOutlet, IonTitle, IonToolbar, IonButtons, IonFooter, IonNav } from '@ionic/angular/standalone';
 import { AsideComponent } from 'src/app/shared/components/aside/aside.component';
 import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
 
@@ -10,7 +10,7 @@ import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
   templateUrl: './app.page.html',
   styleUrls: ['./app.page.scss'],
   standalone: true,
-  imports: [
+  imports: [IonNav, IonFooter, IonButtons,
     IonContent,
     IonHeader,
     IonTitle,

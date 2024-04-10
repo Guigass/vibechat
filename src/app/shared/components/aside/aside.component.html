@@ -1,3 +1,15 @@
-<p>
-  aside works!
-</p>
+<ion-header>
+  <ion-searchbar show-clear-button="always" value="Always Show"></ion-searchbar>
+  <ion-segment>
+    <ion-segment-button value="usuarios">
+      <ion-label>Usuarios</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="grupos">
+      <ion-label>Grupos</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+</ion-header>
+<ion-content >
+  <app-roster-user-item ></app-roster-user-item>
+  <app-roster-group ></app-roster-group>
+</ion-content>
