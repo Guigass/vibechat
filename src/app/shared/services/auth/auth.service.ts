@@ -56,7 +56,7 @@ export class AuthService {
       return this.login(userCredentials);
     }
 
-    return of();
+    return of(false);
   }
 
   logout(): void {

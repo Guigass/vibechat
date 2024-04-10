@@ -1,17 +1,22 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { Component } from '@angular/core';
 import { IonContent, IonHeader, IonTitle, IonToolbar, IonIcon, IonCard } from '@ionic/angular/standalone';
 import { LoginComponent } from "../../shared/components/login/login.component";
-import { AuthService } from 'src/app/shared/services/auth/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.page.html',
     styleUrls: ['./login.page.scss'],
     standalone: true,
-    imports: [IonContent, LoginComponent]
+    imports: [IonContent, LoginComponent, CommonModule]
 })
 export class LoginPage {
+    showSplashScreen: boolean = true;
 
+    constructor() {
+    }
+
+    hideSplashScreen(evt: any) {
+        this.showSplashScreen = false;
+    }
 }
