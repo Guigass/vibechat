@@ -1,15 +1,16 @@
 import { UserPreferenceService } from './../../services/user-preference/user-preference.service';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRow, IonCol, IonButton, IonInput, IonText, ToastController, IonCheckbox, IonLabel, IonItem, IonIcon, NavController, LoadingController, IonLoading } from "@ionic/angular/standalone";
 import { AuthService } from '../../services/auth/auth.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
 import { addIcons } from 'ionicons';
-import { eye, eyeOff } from 'ionicons/icons';
-import { of, switchMap, map, take, Observable } from 'rxjs';
+import { eye, eyeOff, time } from 'ionicons/icons';
+import { of, switchMap, map, take, Observable, timer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
 import { StorageService } from '../../services/storage/storage.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login-component',
@@ -31,10 +32,13 @@ import { StorageService } from '../../services/storage/storage.service';
     IonCheckbox,
     IonItem,
     IonIcon,
-    IonLoading
+    IonLoading,
+    CommonModule
   ]
 })
 export class LoginComponent implements OnInit {
+  @Output() innitFinish = new EventEmitter<boolean>();
+
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
   private storageService = inject(StorageService);
@@ -55,8 +59,6 @@ export class LoginComponent implements OnInit {
   loadingMessage = 'Autenticando...';
 
   constructor() {
-    this.processLogin(this.authService.checkAutoLogin())
-    
     addIcons({
       eye,
       eyeOff
@@ -64,6 +66,8 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.processLogin(this.authService.checkAutoLogin(), true);
+
     this.loadPreferences();
   }
 
@@ -85,7 +89,7 @@ export class LoginComponent implements OnInit {
   }
 
   processLogin(login: Observable<boolean>, autoLogin = false){
-    if (autoLogin) {
+    if (!autoLogin) {
       this.loadingMessage = 'Autenticando...';
       this.isLoading = true;
     }
@@ -93,11 +97,12 @@ export class LoginComponent implements OnInit {
     login.pipe(
       switchMap((logged) => {
         if(!logged){
-          this.presentErrorToast();
+          if (!autoLogin) {
+            this.presentErrorToast();
 
-          this.loadingMessage = 'Ops, deu errado.';
-          this.isLoading = false;
-
+            this.loadingMessage = 'Ops, deu errado.';
+          }
+          
           return of(false);
         }
 
@@ -115,9 +120,13 @@ export class LoginComponent implements OnInit {
       })
     ).subscribe((logged) => {
       if(logged){
-        this.isLoading = false;
         this.navController.navigateRoot('/home');
+      } else {
+        this.innitFinish.emit(true);
       }
+    })
+    .add(() => { 
+      this.isLoading = false; 
     });
   }
 
