@@ -1,5 +1,19 @@
-<div>
-{{contact?.name}}
-<br>
-{{contact?.presence?.type}}
-</div>
+<ion-card>
+  <ion-card-header>
+    <ion-row>
+      <ion-col size="1.5">
+        <ion-avatar [ngStyle]=" contact?.presence?.type === 'online' ? { 'outline-color': 'green' } : { 'outline-color': 'red' }" >
+          <ion-img src="../../assets/icon/person.png"></ion-img>
+        </ion-avatar>
+      </ion-col>
+      <ion-col>
+        <ion-card-title>{{contact?.name}}</ion-card-title>
+      </ion-col>
+    </ion-row>
+    <ion-card-subtitle>{{contact?.presence?.type}}</ion-card-subtitle>
+  </ion-card-header>
+
+  <ion-card-content>
+    <p>Colocar A ultima mensagen do contato</p>
+  </ion-card-content>
+</ion-card>

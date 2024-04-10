@@ -4,8 +4,8 @@
       <ion-label>{{rosterGroup?.name}} </ion-label>
     </ion-item>
 
-    <div class="ion-padding" slot="content" *ngFor="let contact of rosterGroup?.contacts">
-      <app-roster-contact-item  [contact]=contact></app-roster-contact-item>
+    <div slot="content" *ngFor="let contact of rosterGroup?.contacts" >
+      <app-roster-contact-item   [contact]=contact></app-roster-contact-item>
     </div>
   </ion-accordion>
 </ion-accordion-group>
