@@ -8,6 +8,7 @@ import { RosterService } from '../shared/services/roster/roster.service';
 import { PresenceService } from '../shared/services/presence/presence.service';
 import { PresenceType } from '../shared/enums/presence-type.enum';
 import { NotificationService } from '../shared/services/notification/notification.service';
+import { StorageService } from '../shared/services/storage/storage.service';
 
 @Component({
   selector: 'app-home',
@@ -18,11 +19,6 @@ import { NotificationService } from '../shared/services/notification/notificatio
 })
 export class HomePage {
 
-  constructor(
-    private xmppService: XmppService, 
-    private chatService: ChatService, 
-    private rosterService: RosterService,
-    private presenceService: PresenceService,
-    private notificationService: NotificationService) {
+  constructor() {
   }
 }

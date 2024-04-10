@@ -4,8 +4,6 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class NotificationService {
-  constructor() {}
-
   requestPermission(): void {
     if (!('Notification' in window)) {
     } else if (Notification.permission !== 'denied') {

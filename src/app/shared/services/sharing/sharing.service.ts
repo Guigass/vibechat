@@ -1,5 +1,5 @@
 import { XmppServicesService } from './../xmpp-services/xmpp-services.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { Observable, Subject, catchError, filter, map, of, switchMap, tap, throwError } from 'rxjs';
 import { xml } from '@xmpp/client';
@@ -10,15 +10,13 @@ import { XmppServicesModel } from '../../models/xmpp-services.model';
   providedIn: 'root'
 })
 export class SharingService {
+  private xmppService = inject(XmppService);
+  private xmppServicesService = inject(XmppServicesService); 
+  private httpClient = inject(HttpClient);
+
   private uploadProgressSource = new Subject<{fileId: string, progress: number}>();
   get uploadProgress$() {
     return this.uploadProgressSource.asObservable();
-  }
-
-  constructor(
-              private xmppService: XmppService, 
-              private xmppServicesService: XmppServicesService, 
-              private httpClient: HttpClient) {
   }
 
   shareFile(file: File, fileId: string): Observable<any> {

@@ -1,5 +1,5 @@
 import { Observable, filter, map } from 'rxjs';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { xml } from '@xmpp/client';
 import { PresenceType } from '../../enums/presence-type.enum';
@@ -9,7 +9,7 @@ import { PresenceModel } from '../../models/presence.model';
   providedIn: 'root'
 })
 export class PresenceService {
-  constructor(private xmppService: XmppService) { }
+  private xmppService = inject(XmppService);
 
   sendPresence(presenceType: PresenceType, statusMessage: string): Observable<void> {
     let presenceStanza = xml('presence', {},
