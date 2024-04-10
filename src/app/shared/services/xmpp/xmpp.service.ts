@@ -35,13 +35,15 @@ export class XmppService {
 
     this.domain = domain;
 
-    this.xmpp = client({
+    const loginParams = {
       service: service,
       domain: domain,
       username: username,
       password: password,
       resource: 'vibe-chat'
-    });
+    };
+
+    this.xmpp = client(loginParams);
 
     this.xmpp.on('online', (address) => {
       this.isConnected = true;
