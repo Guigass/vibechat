@@ -1,14 +1,14 @@
 <ion-header>
-  <ion-searchbar show-clear-button="always" value="Always Show"></ion-searchbar>
-  <ion-segment>
+  <ion-segment [value]="view" (ionChange)="changeView($event)">
     <ion-segment-button value="usuarios">
-      <ion-label>Usuarios</ion-label>
+      <ion-label>Default</ion-label>
     </ion-segment-button>
     <ion-segment-button value="grupos">
-      <ion-label>Grupos</ion-label>
+      <ion-label>Segment</ion-label>
     </ion-segment-button>
   </ion-segment>
 </ion-header>
-<ion-content >
-<app-roster></app-roster>
+<ion-content>
+<app-roster *ngIf="view === 'usuarios'"></app-roster>
+<p *ngIf="view === 'grupos'">Grupos</p>
 </ion-content>

@@ -5,29 +5,30 @@ import { AuthService } from '../../services/auth/auth.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
-import { addIcons } from 'ionicons';
-import { eye, eyeOff, time } from 'ionicons/icons';
 import { of, switchMap, map, take, Observable, timer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
 import { StorageService } from '../../services/storage/storage.service';
 import { CommonModule } from '@angular/common';
+
+import { addIcons } from 'ionicons';
+import { eye, eyeOff } from 'ionicons/icons';
 
 @Component({
   selector: 'app-login-component',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [IonIcon, IonLabel, 
-    IonText, 
-    IonInput, 
-    IonButton, 
-    IonCol, 
-    IonRow, 
-    IonCardContent, 
-    IonCardTitle, 
-    IonContent, 
-    IonCard, 
-    IonCardHeader, 
+  imports: [IonIcon, IonLabel,
+    IonText,
+    IonInput,
+    IonButton,
+    IonCol,
+    IonRow,
+    IonCardContent,
+    IonCardTitle,
+    IonContent,
+    IonCard,
+    IonCardHeader,
     ReactiveFormsModule,
     IonCheckbox,
     IonItem,
@@ -85,7 +86,7 @@ export class LoginComponent implements OnInit {
     if(this.loginForm.valid) {
       this.processLogin(this.authService.login(this.loginForm.value as LoginModel))
     }
-   
+
   }
 
   processLogin(login: Observable<boolean>, autoLogin = false){
@@ -102,7 +103,7 @@ export class LoginComponent implements OnInit {
 
             this.loadingMessage = 'Ops, deu errado.';
           }
-          
+
           return of(false);
         }
 
@@ -120,13 +121,13 @@ export class LoginComponent implements OnInit {
       })
     ).subscribe((logged) => {
       if(logged){
-        this.navController.navigateRoot('/home');
+        this.navController.navigateRoot('/');
       } else {
         this.innitFinish.emit(true);
       }
     })
-    .add(() => { 
-      this.isLoading = false; 
+    .add(() => {
+      this.isLoading = false;
     });
   }
 

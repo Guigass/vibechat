@@ -22,13 +22,15 @@ import { RosterComponent } from '../roster/roster.component';
 })
 export class AsideComponent  implements OnInit {
 
-  public usuarios = true;
+  public view : string = 'usuarios';
 
   constructor() { }
 
   ngOnInit() {
-
-    console.log(this.usuarios);
+    console.log(this.view);
   }
 
+  changeView(evt: any) {
+    this.view = evt.detail.value;
+  }
 }

@@ -1,7 +1,11 @@
-<p>
-  roster-group works!
-</p>
+<ion-accordion-group>
+  <ion-accordion >
+    <ion-item slot="header" color="light">
+      <ion-label>{{rosterGroup?.name}} </ion-label>
+    </ion-item>
 
-<!-- <div *ngFor="let item of list">
-  lista roster user item
-</div> -->
+    <div class="ion-padding" slot="content" *ngFor="let contact of rosterGroup?.contacts">
+      <app-roster-contact-item  [contact]=contact></app-roster-contact-item>
+    </div>
+  </ion-accordion>
+</ion-accordion-group>
