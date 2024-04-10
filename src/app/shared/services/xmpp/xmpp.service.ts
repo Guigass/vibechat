@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, client, xml } from '@xmpp/client';
-import { BehaviorSubject, Subject, filter, from, of, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, Subject, defer, filter, from, of, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +9,7 @@ export class XmppService {
   public domain!: string;
   private xmpp!: Client;
 
-  private onStanza = new Subject<any>();
+  private onStanza = new ReplaySubject<any>();
   get onStanza$() {
     return this.onStanza.asObservable();
   }
@@ -69,19 +69,19 @@ export class XmppService {
       this.onError.next(err);
     });
 
-    return from(this.xmpp.start());
+    return defer(() => from(this.xmpp.start()));
   }
 
   disconnect() {
-    return from(this.xmpp.stop());
+    return defer(() => from(this.xmpp.stop()));
   }
 
   sendStanza(stanza: any) {
     if (!this.isConnected) {
-      return from(Promise.reject('Not connected'));
+      return defer(() => from(Promise.reject('Not connected')));
     }
 
-    return from(this.xmpp.send(stanza));
+    return defer(() => from(this.xmpp.send(stanza)));
   }
 
   sendIq(stanza: any) {
@@ -89,6 +89,6 @@ export class XmppService {
       return from(Promise.reject('Not connected'));
     }
 
-    return from(this.xmpp.iqCaller.request(stanza));
+    return defer(() => from(this.xmpp.iqCaller.request(stanza)));
   }
 }
