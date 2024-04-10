@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, of, switchMap, map, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, of, switchMap } from 'rxjs';
 import { XmppService } from '../xmpp/xmpp.service';
 import { UserPreferenceService } from '../user-preference/user-preference.service';
 import { LoginModel } from '../../models/login.model';
@@ -20,31 +20,25 @@ export class AuthService {
   }
 
   login(userCredentials: LoginModel): Observable<boolean> {
-    return this.xmppService
-      .connect(`wss://${userCredentials.server}:7443/ws`, userCredentials.server, `${userCredentials.username}@${userCredentials.server}`, userCredentials.password).pipe(
-        switchMap(() => {
-          if (userCredentials.rememberMe && userCredentials.autoLogin) {
-            this.userPreference.setPreference(this.preferenceKey, userCredentials);
-          } else if (userCredentials.rememberMe) {
-            userCredentials.password = '';
-            this.userPreference.setPreference(this.preferenceKey, userCredentials);
-          } else {
-            this.userPreference.removePreference(this.preferenceKey);
-          }
+    return this.xmppService.connect(`wss://${userCredentials.server}:7443/ws`, userCredentials.server, `${userCredentials.username}`, userCredentials.password).pipe(
+      switchMap(() => {
+        this.isAuthenticatedSubject.next(true);
 
-          return this.xmppService.onOnline$.pipe(
-            tap(() => this.isAuthenticatedSubject.next(true)),
-            map(() => true)
-          );
-        }),
-        catchError(error => {
-          this.xmppService.disconnect();
-          return this.xmppService.onOffline$.pipe(
-            tap(() => this.isAuthenticatedSubject.next(false)),
-            map(() => false)
-          );
-        })
-      );
+        if (userCredentials.rememberMe) {
+          const credentialsToSave = userCredentials.autoLogin ? userCredentials : { ...userCredentials, password: '' };
+          this.userPreference.setPreference(this.preferenceKey, credentialsToSave);
+        } else {
+          this.userPreference.removePreference(this.preferenceKey);
+        }
+        
+        return of(true);
+      }),
+      catchError(error => {
+        this.xmppService.disconnect();
+        this.isAuthenticatedSubject.next(false);
+        return of(false);
+      })
+    );
   }
 
   private checkAutoLogin(): void {

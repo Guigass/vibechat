@@ -1,13 +1,14 @@
 import { UserPreferenceService } from './../../services/user-preference/user-preference.service';
 import { Component, OnInit, inject } from '@angular/core';
-import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRow, IonCol, IonButton, IonInput, IonText, ToastController, IonCheckbox, IonLabel, IonItem, IonIcon, NavController } from "@ionic/angular/standalone";
+import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRow, IonCol, IonButton, IonInput, IonText, ToastController, IonCheckbox, IonLabel, IonItem, IonIcon, NavController, LoadingController, IonLoading } from "@ionic/angular/standalone";
 import { AuthService } from '../../services/auth/auth.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
-import { Router } from '@angular/router';
 import { addIcons } from 'ionicons';
 import { eye, eyeOff } from 'ionicons/icons';
+import { of, switchMap, map, take } from 'rxjs';
+import { XmppService } from '../../services/xmpp/xmpp.service';
 
 @Component({
   selector: 'app-login-component',
@@ -28,14 +29,17 @@ import { eye, eyeOff } from 'ionicons/icons';
     ReactiveFormsModule,
     IonCheckbox,
     IonItem,
-    IonIcon
+    IonIcon,
+    IonLoading
   ]
 })
 export class LoginComponent implements OnInit {
   private authService = inject(AuthService);
+  private xmppService = inject(XmppService);
   private userPreferenceService = inject(UserPreferenceService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
+  private loadingCtrl = inject(LoadingController);
 
   loginForm = new FormGroup({
     server: new FormControl('', Validators.required),
@@ -46,6 +50,9 @@ export class LoginComponent implements OnInit {
   });
 
   showPassword = false;
+
+  isLoading = false;
+  loadingMessage = 'Autenticando...';
 
   constructor() {
     addIcons({
@@ -73,14 +80,30 @@ export class LoginComponent implements OnInit {
   login(): void {
     this.loginForm.markAllAsTouched();
 
-    if(this.loginForm.valid){
-      this.authService.login(this.loginForm.value as LoginModel).subscribe((logged) => {
-        if(!logged){
-          this.presentErrorToast();
-          return;
+    if(this.loginForm.valid) {
+      this.loadingMessage = 'Autenticando...';
+      this.isLoading = true;
+
+      this.authService.login(this.loginForm.value as LoginModel).pipe(
+        switchMap((logged) => {
+          if(!logged){
+            this.presentErrorToast();
+            return of(false);
+          }
+
+          this.loadingMessage = 'Autenticado, Conectando...';
+
+          if (this.xmppService.isConnected) {
+            return of(true);
+          }
+
+          return this.xmppService.onOnline$.pipe(take(1), map(() => true));
+        })
+      ).subscribe((logged) => {
+        if(logged){
+          this.isLoading = false;
+          this.navController.navigateRoot('/home');
         }
-        
-        this.navController.navigateRoot('/home');
       });
     }
    
