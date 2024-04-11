@@ -1,10 +1,10 @@
 <ion-accordion-group>
-  <ion-accordion >
-    <ion-item slot="header" color="light">
-      <ion-label>{{rosterGroup?.name}} </ion-label>
+  <ion-accordion>
+    <ion-item slot="header">
+      <ion-label>{{rosterGroup?.name}}</ion-label>
     </ion-item>
 
-    <div slot="content" *ngFor="let contact of rosterGroup?.contacts" >
+    <div slot="content" *ngFor="let contact of rosterGroup?.contacts">
       <app-roster-contact-item  [contact]=contact></app-roster-contact-item>
     </div>
   </ion-accordion>
