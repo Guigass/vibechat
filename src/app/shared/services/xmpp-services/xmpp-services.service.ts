@@ -15,10 +15,10 @@ export class XmppServicesService {
 
   constructor() {
     if (this.xmppService.isConnected) {
-      this.discoverServices();
+      this.discoverServices().subscribe();
     } else {
       this.xmppService.onOnline$.subscribe(() => {
-        this.discoverServices();
+        this.discoverServices().subscribe();
       });
     }
 

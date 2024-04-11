@@ -2,7 +2,7 @@ import { xml } from '@xmpp/client';
 import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
-import {  Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
+import { Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
 import { MessageModel } from '../../models/message.model';
 
 @Injectable({
@@ -11,18 +11,26 @@ import { MessageModel } from '../../models/message.model';
 export class ChatService {
   private xmppService = inject(XmppService);
 
-  sendMessage(message: string, to: string): Observable<any> {
-    return this.xmppService.sendStanza(xml('message', { to: to, type: 'chat', id: uuidv4() }, xml('body', {}, message))).pipe(
-      catchError(error => {
-        console.error('Erro ao enviar mensagem:', error);
-        return throwError(() => new Error('Falha ao enviar mensagem'));
-      })
+  sendMessage(body: string, to: string): Observable<any> {
+    var message = 
+    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    xml('body', {}, body),
+    xml('markable', 'urn:xmpp:chat-markers:0'),
+    xml('request', 'urn:xmpp:receipts'),
     );
+
+    return this.xmppService.sendStanza(message)
+      .pipe(
+        catchError(error => {
+          console.error('Erro ao enviar mensagem:', error);
+          return throwError(() => new Error('Falha ao enviar mensagem'));
+        })
+      );
   }
 
   onMessageFromUser(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
-      filter(stanza => stanza.is('message')), 
+      filter(stanza => stanza.is('message')),
       filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       filter(stanza => stanza.attrs.from.split('/')[0] === from),
       map(stanza => {
@@ -31,13 +39,15 @@ export class ChatService {
         const messageId = stanza.attrs.id;
         const type = 'received';
 
+        this.sendReceipt(stanza.attrs.from, messageId).subscribe();
+
         return new MessageModel(from, stanza.attrs.to, body, timestamp, messageId, type);
       }));
   }
 
   isUserTyping(from: string): Observable<boolean> {
     return this.xmppService.onStanza$.pipe(
-      filter(stanza => stanza.is('message')), 
+      filter(stanza => stanza.is('message')),
       filter(stanza => stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') || stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       filter(stanza => stanza.attrs.from.split('/')[0] === from),
       switchMap(stanza => {
@@ -47,7 +57,7 @@ export class ChatService {
             startWith(true)
           );
         } else if (stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')) {
-          return of(false); 
+          return of(false);
         }
         return of(false);
       }),
@@ -76,7 +86,6 @@ export class ChatService {
 
     return this.xmppService.sendStanza(mamQuery);
   }
-
   getMessagesHistory(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
       // Filtra para processar apenas mensagens relevantes
@@ -99,5 +108,23 @@ export class ChatService {
         return new MessageModel(from, message.attrs.to, body, timestamp, messageId, type);
       })
     );
+  }
+
+  sendReceipt(to: string, id: string): Observable<any> {
+    var message = 
+    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    xml('received', { xmlns: 'urn:xmpp:receipts', id: id }),
+    );
+
+    return this.xmppService.sendStanza(message);
+  }
+
+  sendReadReceipt(to: string, id: string): Observable<any> {
+    var message = 
+    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    xml('displayed', { xmlns: 'urn:xmpp:chat-markers:0', id: id }),
+    );
+
+    return this.xmppService.sendStanza(message);
   }
 }

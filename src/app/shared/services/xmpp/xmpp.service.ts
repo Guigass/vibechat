@@ -7,6 +7,7 @@ import { BehaviorSubject, ReplaySubject, Subject, defer, filter, from, of, take 
 })
 export class XmppService {
   public domain!: string;
+  public userName!: string;
   private xmpp!: Client;
 
   private onStanza = new ReplaySubject<any>();
@@ -29,11 +30,13 @@ export class XmppService {
   public isConnected = false;
 
   connect(service: string, domain: string, username: string, password: string) {
+    console.log(username)
     if (this.xmpp && this.xmpp.status !== 'offline') {
       return of();
     }
 
     this.domain = domain;
+    this.userName = username;
 
     const loginParams = {
       service: service,

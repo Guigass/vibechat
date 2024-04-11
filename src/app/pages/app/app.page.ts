@@ -7,6 +7,7 @@ import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
 import { DatabaseService } from 'src/app/shared/services/database/database.service';
 import { ChatService } from 'src/app/shared/services/chat/chat.service';
 import { XmppServicesService } from 'src/app/shared/services/xmpp-services/xmpp-services.service';
+import { XmppService } from 'src/app/shared/services/xmpp/xmpp.service';
 
 @Component({
   selector: 'app-app',
@@ -28,7 +29,7 @@ import { XmppServicesService } from 'src/app/shared/services/xmpp-services/xmpp-
 export class AppPage {
   private db = inject(DatabaseService);
   private splashScreenService = inject(SplashScreenService);
-  private xmppServicesService = inject(XmppServicesService);
+  private xmppService = inject(XmppService);
 
   private chatService = inject(ChatService);
 
@@ -36,23 +37,6 @@ export class AppPage {
     this.db.init().subscribe((ready) => {
       if (ready) {
         this.splashScreenService.hide();
-
-        this.chatService.onMessageFromUser('cirion.teste@openfire.exclusivasex.com.br').subscribe((message) => {
-          console.log('Mensagem recebida:', message);
-        });
-
-        this.chatService.sendMessage('Olá, tudo bem?', 'cirion.teste@openfire.exclusivasex.com.br').subscribe(() => {
-          this.chatService.requestMessagesHistory('cirion.teste@openfire.exclusivasex.com.br', 20).subscribe();
-        });
-
-        this.chatService.getMessagesHistory('cirion.teste@openfire.exclusivasex.com.br').subscribe((messages) => {
-          console.log('Histórico de mensagens:', messages);
-        });
-
-       this.xmppServicesService.services$.subscribe((services) => {
-        console.log('Serviços descobertos:', services);
-       })
-
       }
     });
   }
