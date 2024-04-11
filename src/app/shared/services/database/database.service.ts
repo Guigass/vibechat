@@ -12,6 +12,8 @@ export class DatabaseService {
   private encryptService =  inject(EncryptService);
   private storageReady = new BehaviorSubject<boolean>(false);
 
+  private userPrefix = 'app';
+
   constructor() {
     this.init();
   }
@@ -23,20 +25,40 @@ export class DatabaseService {
     this.storageReady.next(true);
   }
 
+  setUserPrefix(userId?: string) {
+    if (!userId) {
+      this.userPrefix = 'app';
+    }
+
+    this.userPrefix = `user_${userId}:`;
+  }
+
+  private prefixKey(key: string): string {
+    return `${this.userPrefix}${key}`;
+  }
+
   addData(key: string, value: any): Observable<any> {
     value = this.encryptService.encrypt(value);
     
     return this.storageReady.pipe(
       filter(ready => ready === true),
-      switchMap(() => from(this.storage.set(key, value))
+      switchMap(() => from(this.storage.set(this.prefixKey(key), value))
     ));
   }
 
   getData(key: string): Observable<any> {
+    console.log(key)
     return this.storageReady.pipe(
       filter((ready: boolean) => ready === true),
-      switchMap(() => this.storage.get(key) || of([])),
-      map((value) => this.encryptService.decrypt(value))
+      switchMap(() => this.storage.get(this.prefixKey(key)) || of([])),
+      map((value) => {
+        console.log(value);
+        if (!value) {
+          return this.encryptService.decrypt(value);
+        } else {
+          return null;
+        }
+      })
     );
   }
 }

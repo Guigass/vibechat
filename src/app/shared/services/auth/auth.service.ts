@@ -5,6 +5,7 @@ import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enum';
 import { WebStorageService } from '../web-storage/web-storage.service';
 import { StorageType } from '../../enums/storage-type.enum';
+import { DatabaseService } from '../database/database.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ import { StorageType } from '../../enums/storage-type.enum';
 export class AuthService {
   private xmppService = inject(XmppService);
   private webStorageService = inject(WebStorageService);
+  private db = inject(DatabaseService);
 
   private preferenceKey = PreferencesKey.UserCredentials;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
@@ -31,6 +33,7 @@ export class AuthService {
         }
         
         this.isAuthenticatedSubject.next(true);
+        this.db.setUserPrefix(userCredentials.username);
         return of(true);
       }),
       catchError(error => {
@@ -59,6 +62,7 @@ export class AuthService {
   logout(): void {
     this.xmppService.disconnect();
     this.webStorageService.removeItem(this.preferenceKey, StorageType.Session);
+    this.db.setUserPrefix();
     this.isAuthenticatedSubject.next(false);
   }
 
