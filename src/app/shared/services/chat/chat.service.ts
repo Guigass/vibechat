@@ -82,6 +82,7 @@ export class ChatService {
       // Filtra para processar apenas mensagens relevantes
       filter(stanza =>
         stanza.is('message') &&
+        stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.from.split('/')[0] === from &&
         stanza.getChild('result', 'urn:xmpp:mam:2') != null
       ),
       map(stanza => {
@@ -92,7 +93,7 @@ export class ChatService {
         const timestamp = new Date(delay.attrs.stamp);
         const body = message.getChildText('body');
         const messageId = result.attrs.id;
-  
+
         const type = message.attrs.from.includes(from) ? 'received' : 'sent';
 
         return new MessageModel(from, message.attrs.to, body, timestamp, messageId, type);

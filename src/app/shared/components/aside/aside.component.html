@@ -1,14 +1,16 @@
-<ion-header>
-  <ion-segment [value]="view" (ionChange)="changeView($event)">
-    <ion-segment-button value="usuarios">
-      <ion-label>Contatos</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="grupos">
-      <ion-label>Grupos</ion-label>
-    </ion-segment-button>
-  </ion-segment>
-</ion-header>
-<ion-content>
-  <app-roster *ngIf="view === 'usuarios'"></app-roster>
-  <p *ngIf="view === 'grupos'">Usuarios</p>
-</ion-content>
+<ion-app>
+  <ion-content>
+    <app-roster *ngIf="view === 'usuarios'"></app-roster>
+    <p *ngIf="view === 'grupos'">Usuarios</p>
+  </ion-content>
+  <ion-footer slot="bottom">
+    <ion-segment [value]="view" (ionChange)="changeView($event)">
+      <ion-segment-button value="usuarios">
+        <ion-label>Contatos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="grupos">
+        <ion-label>Grupos</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-footer>
+</ion-app>

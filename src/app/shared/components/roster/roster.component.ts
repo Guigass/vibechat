@@ -2,7 +2,7 @@ import { Component, OnInit, inject, input } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
-import { IonContent, IonSearchbar } from "@ionic/angular/standalone";
+import { IonContent, IonSearchbar, IonList } from "@ionic/angular/standalone";
 import { take } from 'rxjs';
 
 @Component({
@@ -10,7 +10,7 @@ import { take } from 'rxjs';
   templateUrl: './roster.component.html',
   styleUrls: ['./roster.component.scss'],
   standalone: true,
-  imports: [
+  imports: [IonList, 
     IonSearchbar,
     IonContent,
     CommonModule,

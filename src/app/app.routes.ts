@@ -22,7 +22,7 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'chat',
+        path: 'chat/:jid',
         loadComponent: () => import('./pages/chat/chat.page').then( m => m.ChatPage)
       },
       {

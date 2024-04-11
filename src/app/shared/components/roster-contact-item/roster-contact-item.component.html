@@ -1,17 +1,12 @@
-<ion-card>
-  <ion-card-header>
-    <ion-row>
-      <ion-col size="1.5">
-        <ion-avatar
-          [ngStyle]=" contact?.presence?.type === 'online' ? { 'outline-color': 'green' } : { 'outline-color': 'red' }">
-          <ion-img src="../../assets/icon/person.png"></ion-img>
-        </ion-avatar>
-      </ion-col>
-      <ion-col>
-        <span>{{contact?.name}}</span>
-        <br>
-        <small>Colocar A ultima mensagen do contato</small>
-      </ion-col>
-    </ion-row>
-  </ion-card-header>
-</ion-card>
+<ion-item button routerLinkActive="selected" [routerLink]="'/app/chat/' + contact?.jid">
+  <ion-avatar
+    [ngStyle]=" contact?.presence?.type === 'online' ? { 'outline-color': 'green' } : { 'outline-color': 'red' }">
+    <ion-img src="../../assets/icon/person.png"></ion-img>
+  </ion-avatar>
+  <div class="contact-list">
+    <span title="{{contact?.name}}">{{contact?.name}}</span>
+    <br>
+    <small [title]="lastMessage.body" *ngIf="lastMessage">{{lastMessage.timestamp | data}} - {{lastMessage.body}}</small>
+  </div>
+  <ion-badge title="Mensagens não lidas" slot="end">22</ion-badge>
+</ion-item>
