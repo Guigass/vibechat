@@ -8,7 +8,7 @@ import { RosterService } from '../shared/services/roster/roster.service';
 import { PresenceService } from '../shared/services/presence/presence.service';
 import { PresenceType } from '../shared/enums/presence-type.enum';
 import { NotificationService } from '../shared/services/notification/notification.service';
-import { StorageService } from '../shared/services/storage/storage.service';
+import { StorageService } from '../shared/services/local-storage/storage.service';
 
 @Component({
   selector: 'app-home',

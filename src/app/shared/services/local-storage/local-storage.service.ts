@@ -5,7 +5,7 @@ import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class StorageService {
+export class LocalStorageService {
   private secretKey = environment.storageEncryptionKey;
   private prefix = 'e:';
 

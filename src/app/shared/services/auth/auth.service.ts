@@ -3,15 +3,15 @@ import { BehaviorSubject, NEVER, Observable, catchError, of, switchMap } from 'r
 import { XmppService } from '../xmpp/xmpp.service';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
-import { StorageService } from '../storage/storage.service';
-import { SessionStorageService } from '../storage/session-storage.service';
+import { SessionStorageService } from '../session-storage/session-storage.service';
+import { LocalStorageService } from '../local-storage/local-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private xmppService = inject(XmppService);
-  private storageService = inject(StorageService);
+  private localStorageService = inject(LocalStorageService);
   private sessionStorageService = inject(SessionStorageService);
 
   private preferenceKey = PreferencesKey.UserCredentials;
@@ -26,9 +26,9 @@ export class AuthService {
 
         if (userCredentials.rememberMe) {
           const credentialsToSave = userCredentials.autoLogin ? userCredentials : { ...userCredentials, password: '' };
-          this.storageService.setItem(this.preferenceKey, credentialsToSave, true);
+          this.localStorageService.setItem(this.preferenceKey, credentialsToSave, true);
         } else {
-          this.storageService.removeItem(this.preferenceKey);
+          this.localStorageService.removeItem(this.preferenceKey);
         }
         
         this.isAuthenticatedSubject.next(true);
@@ -49,7 +49,7 @@ export class AuthService {
       return this.login(sessionUserCredentials);
     }
 
-    const userCredentials = this.storageService.getItem<LoginModel>(this.preferenceKey);
+    const userCredentials = this.localStorageService.getItem<LoginModel>(this.preferenceKey);
     if (userCredentials && userCredentials.autoLogin) {
       return this.login(userCredentials);
     }

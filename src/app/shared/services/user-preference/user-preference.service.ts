@@ -1,22 +1,22 @@
 import { Injectable, inject } from '@angular/core';
-import { StorageService } from '../storage/storage.service';
+import { LocalStorageService } from '../local-storage/local-storage.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserPreferenceService {
-  private storageService = inject(StorageService);
+  private localStorageService = inject(LocalStorageService);
 
   setPreference(key: string, value: any): void {
-    this.storageService.setItem(`preferences_${key}`, value, true);
+    this.localStorageService.setItem(`preferences_${key}`, value, true);
   }
 
   getPreference<T>(key: string): T | null {
-    return this.storageService.getItem(`preferences_${key}`);
+    return this.localStorageService.getItem(`preferences_${key}`);
   }
 
   removePreference(key: string): void {
-    this.storageService.removeItem(`preferences_${key}`);
+    this.localStorageService.removeItem(`preferences_${key}`);
   }
 
   clearPreferences(): void {
@@ -24,7 +24,7 @@ export class UserPreferenceService {
       const key = localStorage.key(i);
       
       if (key && key.startsWith("preferences_")) {
-        localStorage.removeItem(key);
+        this.localStorageService.removeItem(key);
       }
     }
   }

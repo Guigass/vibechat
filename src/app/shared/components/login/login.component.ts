@@ -7,11 +7,11 @@ import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enun';
 import { of, switchMap, map, take, Observable, timer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
-import { StorageService } from '../../services/storage/storage.service';
 import { CommonModule } from '@angular/common';
 
 import { addIcons } from 'ionicons';
 import { eye, eyeOff } from 'ionicons/icons';
+import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-login-component',
@@ -42,7 +42,7 @@ export class LoginComponent implements OnInit {
 
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
-  private storageService = inject(StorageService);
+  private localStorageService = inject(LocalStorageService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
 
@@ -73,7 +73,7 @@ export class LoginComponent implements OnInit {
   }
 
   loadPreferences(){
-    const preferences = this.storageService.getItem<LoginModel>(PreferencesKey.UserCredentials);
+    const preferences = this.localStorageService.getItem<LoginModel>(PreferencesKey.UserCredentials);
 
     if(preferences?.rememberMe){
       this.loginForm.setValue(preferences);
