@@ -1,4 +1,4 @@
-import { RosterRepository } from 'src/app/shared/repository/roster/roster.repository';
+import { RosterRepository } from 'src/app/shared/repositories/roster/roster.repository';
 import { Component, OnInit, inject, input } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
