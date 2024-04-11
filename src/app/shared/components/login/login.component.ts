@@ -1,3 +1,4 @@
+import { SplashScreenService } from './../../services/splash-screen/splash-screen.service';
 import { UserPreferenceService } from './../../services/user-preference/user-preference.service';
 import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRow, IonCol, IonButton, IonInput, IonText, ToastController, IonCheckbox, IonLabel, IonItem, IonIcon, NavController, LoadingController, IonLoading } from "@ionic/angular/standalone";
@@ -39,13 +40,12 @@ import { StorageType } from '../../enums/storage-type.enum';
   ]
 })
 export class LoginComponent implements OnInit {
-  @Output() innitFinish = new EventEmitter<boolean>();
-
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
   private webStorageService = inject(WebStorageService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
+  private splashScreenService = inject(SplashScreenService);
 
   loginForm = new FormGroup({
     server: new FormControl('', Validators.required),
@@ -124,7 +124,7 @@ export class LoginComponent implements OnInit {
       if(logged){
         this.navController.navigateRoot('/');
       } else {
-        this.innitFinish.emit(true);
+        this.splashScreenService.hide();
       }
     })
     .add(() => {

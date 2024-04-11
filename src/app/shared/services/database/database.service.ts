@@ -1,7 +1,7 @@
 import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import { Injectable, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
-import { BehaviorSubject, Observable, defer, filter, from, map, of, switchMap } from 'rxjs';
+import { BehaviorSubject, Observable, concatMap, defer, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { EncryptService } from '../encrypt/encrypt.service';
 
 @Injectable({
@@ -14,15 +14,12 @@ export class DatabaseService {
 
   private userPrefix = 'app';
 
-  constructor() {
-    this.init();
-  }
-
-  async init() {
-    await this.storage.defineDriver(CordovaSQLiteDriver);
-    await this.storage.create();
-
-    this.storageReady.next(true);
+  init(): Observable<boolean> {
+    return from(this.storage.defineDriver(CordovaSQLiteDriver)).pipe(
+      concatMap(() => from(this.storage.create())),
+      tap(() => this.storageReady.next(true)),
+      concatMap(() => this.storageReady.asObservable())
+    );
   }
 
   setUserPrefix(userId?: string) {
