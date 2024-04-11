@@ -1,10 +1,14 @@
 <ion-app>
   <ion-content>
+    <p *ngIf="view === 'grupos'">Recentes</p>
     <app-roster *ngIf="view === 'usuarios'"></app-roster>
-    <p *ngIf="view === 'grupos'">Usuarios</p>
+    <p *ngIf="view === 'grupos'">Grupos</p>
   </ion-content>
   <ion-footer slot="bottom">
     <ion-segment [value]="view" (ionChange)="changeView($event)">
+      <ion-segment-button value="conversas">
+        <ion-label>Recentes</ion-label>
+      </ion-segment-button>
       <ion-segment-button value="usuarios">
         <ion-label>Contatos</ion-label>
       </ion-segment-button>
