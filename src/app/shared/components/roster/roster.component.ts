@@ -11,7 +11,7 @@ import { take } from 'rxjs';
   templateUrl: './roster.component.html',
   styleUrls: ['./roster.component.scss'],
   standalone: true,
-  imports: [IonList, 
+  imports: [IonList,
     IonSearchbar,
     IonContent,
     CommonModule,
