@@ -3,7 +3,7 @@ import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { PresenceService } from '../../services/presence/presence.service';
 import { ContactModel } from '../../models/contact.model';
 import { Subscription } from 'rxjs';
-import { IonIcon, IonBadge, IonCardContent, IonCardTitle, IonCardHeader, IonCard, IonCardSubtitle, IonImg, IonRow, IonCol, IonAvatar, IonItem, IonGrid, IonLabel } from "@ionic/angular/standalone";
+import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem} from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { personOutline, person } from 'ionicons/icons';
@@ -16,16 +16,13 @@ import { DataPipe } from '../../pipes/data/data.pipe';
   templateUrl: './roster-contact-item.component.html',
   styleUrls: ['./roster-contact-item.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonGrid, IonItem, IonAvatar, IonCol, IonRow,
+  imports: [
+    IonItem,
+    IonAvatar,
     IonImg,
-    IonCardSubtitle,
     CommonModule,
     IonItem,
     IonBadge,
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardContent,
     IonIcon,
     RouterLink,
     RouterLinkActive,
