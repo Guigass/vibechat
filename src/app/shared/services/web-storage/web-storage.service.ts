@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
-import * as CryptoJS from 'crypto-js';
+import { Injectable, inject } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { StorageType } from '../../enums/storage-type.enum';
+import { EncryptService } from '../encrypt/encrypt.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebStorageService {
-  private secretKey = environment.storageEncryptionKey;
+  private encryptService = inject(EncryptService);
+  
   private prefix = 'e:';
   
   setItem(key: string, value: any, storageType: StorageType, encrypt = false): void {
@@ -20,7 +21,7 @@ export class WebStorageService {
     }
 
     if (encrypt) {
-      valueToStore = this.prefix + CryptoJS.AES.encrypt(JSON.stringify(value), this.secretKey).toString();
+      valueToStore = this.prefix + this.encryptService.encrypt(valueToStore);
     }
 
     storage.setItem(key, valueToStore);
@@ -36,8 +37,7 @@ export class WebStorageService {
     if (item.startsWith(this.prefix)) {
       valueToReturn = item.slice(this.prefix.length);
 
-      const decryptedBytes = CryptoJS.AES.decrypt(valueToReturn, this.secretKey);
-      valueToReturn = decryptedBytes.toString(CryptoJS.enc.Utf8);
+      valueToReturn = this.encryptService.decrypt(valueToReturn);
     }
 
     try {
