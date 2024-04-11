@@ -1,15 +1,18 @@
 import { Injectable } from '@angular/core';
 import * as CryptoJS from 'crypto-js';
 import { environment } from 'src/environments/environment';
+import { StorageType } from '../../enums/storage-type.enum';
 
 @Injectable({
   providedIn: 'root'
 })
-export class SessionStorageService {
+export class WebStorageService {
   private secretKey = environment.storageEncryptionKey;
   private prefix = 'e:';
-
-  setItem(key: string, value: any, encrypt = false): void {
+  
+  setItem(key: string, value: any, storageType: StorageType, encrypt = false): void {
+    let storage = this.getStorage(storageType);
+    
     let valueToStore = value;
 
     if (typeof value === 'object') {
@@ -20,11 +23,13 @@ export class SessionStorageService {
       valueToStore = this.prefix + CryptoJS.AES.encrypt(JSON.stringify(value), this.secretKey).toString();
     }
 
-    sessionStorage.setItem(key, valueToStore);
+    storage.setItem(key, valueToStore);
   }
 
-  getItem<T>(key: string): T | null {
-    const item = sessionStorage.getItem(key);
+  getItem<T>(key: string, storageType: StorageType): T | null {
+    let storage = this.getStorage(storageType);
+    const item = storage.getItem(key);
+
     if (!item) return null;
 
     let valueToReturn = item;
@@ -42,11 +47,17 @@ export class SessionStorageService {
     }
   }
 
-  removeItem(key: string): void {
-    sessionStorage.removeItem(key);
+  removeItem(key: string, storageType: StorageType): void {
+    let storage = this.getStorage(storageType);
+    storage.removeItem(key);
   }
 
-  clear(): void {
-    sessionStorage.clear();
+  clear(storageType: StorageType): void {
+    let storage = this.getStorage(storageType);
+    storage.clear();
+  }
+
+  private getStorage(storageType: StorageType): Storage {
+    return storageType === StorageType.Local ? localStorage : sessionStorage;
   }
 }

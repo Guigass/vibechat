@@ -1,22 +1,23 @@
 import { Injectable, inject } from '@angular/core';
-import { LocalStorageService } from '../local-storage/local-storage.service';
+import { WebStorageService } from '../web-storage/web-storage.service';
+import { StorageType } from '../../enums/storage-type.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserPreferenceService {
-  private localStorageService = inject(LocalStorageService);
+  private webStorageService = inject(WebStorageService);
 
   setPreference(key: string, value: any): void {
-    this.localStorageService.setItem(`preferences_${key}`, value, true);
+    this.webStorageService.setItem(`preferences_${key}`, value, StorageType.Local, true);
   }
 
   getPreference<T>(key: string): T | null {
-    return this.localStorageService.getItem(`preferences_${key}`);
+    return this.webStorageService.getItem(`preferences_${key}`, StorageType.Local);
   }
 
   removePreference(key: string): void {
-    this.localStorageService.removeItem(`preferences_${key}`);
+    this.webStorageService.removeItem(`preferences_${key}`, StorageType.Local);
   }
 
   clearPreferences(): void {
@@ -24,7 +25,7 @@ export class UserPreferenceService {
       const key = localStorage.key(i);
       
       if (key && key.startsWith("preferences_")) {
-        this.localStorageService.removeItem(key);
+        this.webStorageService.removeItem(key, StorageType.Local);
       }
     }
   }

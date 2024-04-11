@@ -4,14 +4,15 @@ import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRo
 import { AuthService } from '../../services/auth/auth.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginModel } from '../../models/login.model';
-import { PreferencesKey } from '../../enums/preferences.enun';
+import { PreferencesKey } from '../../enums/preferences.enum';
 import { of, switchMap, map, take, Observable, timer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
 import { CommonModule } from '@angular/common';
 
 import { addIcons } from 'ionicons';
 import { eye, eyeOff } from 'ionicons/icons';
-import { LocalStorageService } from '../../services/local-storage/local-storage.service';
+import { WebStorageService } from '../../services/web-storage/web-storage.service';
+import { StorageType } from '../../enums/storage-type.enum';
 
 @Component({
   selector: 'app-login-component',
@@ -42,7 +43,7 @@ export class LoginComponent implements OnInit {
 
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
-  private localStorageService = inject(LocalStorageService);
+  private webStorageService = inject(WebStorageService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
 
@@ -73,7 +74,7 @@ export class LoginComponent implements OnInit {
   }
 
   loadPreferences(){
-    const preferences = this.localStorageService.getItem<LoginModel>(PreferencesKey.UserCredentials);
+    const preferences = this.webStorageService.getItem<LoginModel>(PreferencesKey.UserCredentials, StorageType.Local);
 
     if(preferences?.rememberMe){
       this.loginForm.setValue(preferences);
