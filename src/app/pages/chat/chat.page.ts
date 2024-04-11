@@ -78,10 +78,6 @@ export class ChatPage implements OnInit, OnDestroy {
       });
       this.chatService.requestMessagesHistory(this.jid, 10).subscribe();
     }
-    this.presenceSubscription.getPresenceFromUser(this.jid).subscribe((presence) => {
-      this.user = presence
-      console.log(this.user)
-    })
 
   }
 
