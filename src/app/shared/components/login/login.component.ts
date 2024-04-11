@@ -77,7 +77,13 @@ export class LoginComponent implements OnInit {
     const preferences = this.webStorageService.getItem<LoginModel>(PreferencesKey.UserCredentials, StorageType.Local);
 
     if(preferences?.rememberMe){
-      this.loginForm.setValue(preferences);
+      this.loginForm.setValue({
+        server: preferences.server,
+        username: preferences.username,
+        rememberMe: preferences.rememberMe,
+        autoLogin: preferences.autoLogin,
+        password: '',
+      });
     }
   }
 

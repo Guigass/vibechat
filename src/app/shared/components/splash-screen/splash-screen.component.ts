@@ -14,7 +14,6 @@ export class SplashScreenComponent {
   private splashScreenService = inject(SplashScreenService);
   constructor() { 
     this.splashScreenService.onChanges.subscribe((show: boolean) => {
-      console.log('show', show);
       this.showSplash = show;
     });
   }

@@ -10,7 +10,6 @@ export class SplashScreenService {
   constructor() { }
 
   hide() {
-    console.log('hide');
     this.onChanges.next(false);
   }
 

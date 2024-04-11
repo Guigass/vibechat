@@ -44,12 +44,10 @@ export class DatabaseService {
   }
 
   getData(key: string): Observable<any> {
-    console.log(key)
     return this.storageReady.pipe(
       filter((ready: boolean) => ready === true),
       switchMap(() => this.storage.get(this.prefixKey(key)) || of([])),
       map((value) => {
-        console.log(value);
         if (!value) {
           return this.encryptService.decrypt(value);
         } else {
