@@ -59,7 +59,6 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
 
     this.chatService.requestMessagesHistory(this.contact.jid, 1).subscribe();
   }
-
   ngOnDestroy(): void {
     this.presenceSubscription?.unsubscribe();
   }
