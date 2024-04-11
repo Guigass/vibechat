@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonApp, IonSplitPane, IonMenu, IonContent, IonRouterOutlet, IonHeader, IonToolbar, IonTitle, IonFooter } from '@ionic/angular/standalone';
 import { AsideComponent } from 'src/app/shared/components/aside/aside.component';
 import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
+import { timer } from 'rxjs';
 
 @Component({
   selector: 'app-app',
@@ -22,5 +23,9 @@ import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
   ],
 })
 export class AppPage {
+
+  constructor() {
+    
+  }
 
 }

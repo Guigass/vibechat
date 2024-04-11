@@ -16,7 +16,7 @@ import { DataPipe } from '../../pipes/data/data.pipe';
   templateUrl: './roster-contact-item.component.html',
   styleUrls: ['./roster-contact-item.component.scss'],
   standalone: true,
-  imports: [IonLabel, IonGrid, IonItem, IonAvatar, IonCol, IonRow,
+  imports: [
     IonImg,
     IonCardSubtitle,
     CommonModule,
