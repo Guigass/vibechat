@@ -8,6 +8,7 @@ import { DatabaseService } from 'src/app/shared/services/database/database.servi
 import { ChatService } from 'src/app/shared/services/chat/chat.service';
 import { XmppServicesService } from 'src/app/shared/services/xmpp-services/xmpp-services.service';
 import { XmppService } from 'src/app/shared/services/xmpp/xmpp.service';
+import { RosterRepository } from 'src/app/shared/repository/roster/roster.repository';
 
 @Component({
   selector: 'app-app',
@@ -29,9 +30,8 @@ import { XmppService } from 'src/app/shared/services/xmpp/xmpp.service';
 export class AppPage {
   private db = inject(DatabaseService);
   private splashScreenService = inject(SplashScreenService);
-  private xmppService = inject(XmppService);
 
-  private chatService = inject(ChatService);
+  private rosterRepository = inject(RosterRepository);
 
   constructor() {
     this.db.init().subscribe((ready) => {

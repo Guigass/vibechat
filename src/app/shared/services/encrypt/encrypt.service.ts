@@ -18,7 +18,7 @@ export class EncryptService {
       valueToEncrypt = JSON.stringify(value);
     }
 
-    return CryptoJS.AES.encrypt(value, this.secretKey).toString();
+    return CryptoJS.AES.encrypt(valueToEncrypt, this.secretKey).toString();
   }
 
   decrypt(value: any): any {

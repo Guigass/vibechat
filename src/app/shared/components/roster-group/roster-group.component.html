@@ -5,7 +5,7 @@
     </ion-item>
 
     <div slot="content" *ngFor="let contact of rosterGroup?.contacts">
-      <app-roster-contact-item  [contact]=contact></app-roster-contact-item>
+      <app-roster-contact-item  [contact]="contact"></app-roster-contact-item>
     </div>
   </ion-accordion>
 </ion-accordion-group>

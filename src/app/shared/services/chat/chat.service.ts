@@ -101,7 +101,7 @@ export class ChatService {
         const delay = forwarded.getChild('delay', 'urn:xmpp:delay');
         const timestamp = new Date(delay.attrs.stamp);
         const body = message.getChildText('body');
-        const messageId = result.attrs.id;
+        const messageId = message.attrs.id;
 
         const type = message.attrs.from.includes(from) ? 'received' : 'sent';
 

@@ -62,7 +62,7 @@ export class RosterService {
         const groups = item.getChildren('group').map((group: any) => group.text()) as string[];
         const presence = { type: PresenceType.Offline, status: '', jid: jid } as PresenceModel;
 
-        return { jid, name, groups, subscription, presence};
+        return { jid, name, groups, subscription, presence };
       })
     );
   }
