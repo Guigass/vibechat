@@ -2,8 +2,8 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonButton, IonContent, IonHeader, IonMenuButton, IonTitle, IonToolbar, IonButtons, NavController } from '@ionic/angular/standalone';
-import { Subscription, timer } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-chat',
@@ -24,19 +24,10 @@ export class ChatPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     let jid = this.route.snapshot.paramMap.get('jid');
-
-    console.log('Inicou');
-
-
-    this.timerSubscription = timer(0, 1000).subscribe(() => {
-      //console.log('tick from:', jid);
-    });
   }
 
   ngOnDestroy(): void {
     this.timerSubscription.unsubscribe();
-
-    console.log('Destruiu');
   }
 
 }
