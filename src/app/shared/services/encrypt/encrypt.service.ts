@@ -11,12 +11,24 @@ export class EncryptService {
   
   constructor() { }
 
-  encrypt(value: string): string {
+  encrypt(value: any): string {
+    let valueToEncrypt = value;
+
+    if (typeof value === 'object') {
+      valueToEncrypt = JSON.stringify(value);
+    }
+
     return CryptoJS.AES.encrypt(value, this.secretKey).toString();
   }
 
-  decrypt(value: string): string {
+  decrypt(value: any): any {
     const decryptedBytes = CryptoJS.AES.decrypt(value, this.secretKey);
-    return decryptedBytes.toString(CryptoJS.enc.Utf8);
+    let decryptedValue = decryptedBytes.toString(CryptoJS.enc.Utf8);
+
+    try {
+      return JSON.parse(decryptedValue);
+    } catch {
+      return decryptedValue;
+    }
   }
 }

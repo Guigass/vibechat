@@ -1,57 +1,42 @@
+import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import { Injectable, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
-import { environment } from 'src/environments/environment';
+import { BehaviorSubject, Observable, defer, filter, from, map, of, switchMap } from 'rxjs';
+import { EncryptService } from '../encrypt/encrypt.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatabaseService {
   private storage =  inject(Storage);
-
-  private _storage: Storage | null = null;
+  private encryptService =  inject(EncryptService);
+  private storageReady = new BehaviorSubject<boolean>(false);
 
   constructor() {
     this.init();
   }
 
   async init() {
-    const storage = await this.storage.create();
-    storage.setEncryptionKey(environment.storageEncryptionKey);
+    await this.storage.defineDriver(CordovaSQLiteDriver);
+    await this.storage.create();
 
-    this._storage = storage;
+    this.storageReady.next(true);
   }
 
-  async set(key: string, value: any): Promise<void> {
-    await this._storage?.set(key, value);
+  addData(key: string, value: any): Observable<any> {
+    value = this.encryptService.encrypt(value);
+    
+    return this.storageReady.pipe(
+      filter(ready => ready === true),
+      switchMap(() => from(this.storage.set(key, value))
+    ));
   }
 
-  async get(key: string): Promise<any> {
-    return await this._storage?.get(key);
-  }
-
-  async remove(key: string): Promise<void> {
-    await this._storage?.remove(key);
-  }
-
-  async clear(): Promise<void> {
-    await this._storage?.clear();
-  }
-
-  async keys(): Promise<string[]> {
-    return await this._storage?.keys();
-  }
-
-  async length(): Promise<number> {
-    const keys = await this._storage?.keys();
-    return keys?.length ?? 0;
-  }
-
-  async forEach(callback: (key: string, value: any, index: number) => void): Promise<void> {
-    const keys = await this._storage?.keys();
-    for (let i = 0; i < (keys?.length ?? 0); i++) {
-      const key = keys![i];
-      const value = await this._storage?.get(key);
-      callback(key, value, i);
-    }
+  getData(key: string): Observable<any> {
+    return this.storageReady.pipe(
+      filter((ready: boolean) => ready === true),
+      switchMap(() => this.storage.get(key) || of([])),
+      map((value) => this.encryptService.decrypt(value))
+    );
   }
 }

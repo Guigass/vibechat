@@ -37,7 +37,7 @@ export class WebStorageService {
     if (item.startsWith(this.prefix)) {
       valueToReturn = item.slice(this.prefix.length);
 
-      valueToReturn = this.encryptService.decrypt(valueToReturn);
+      return this.encryptService.decrypt(valueToReturn);
     }
 
     try {
