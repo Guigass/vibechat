@@ -1,12 +1,20 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>Chat</ion-title>
+    <ion-title></ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding">
-
+<ion-content class="ion-padding" *ngIf="mensagens">
+  <app-message-bubble [message]="mensagens"></app-message-bubble>
 </ion-content>
-
+<ion-footer>
+  <ion-item class="container">
+    <ion-item button>
+      <ion-icon name="happy-outline"></ion-icon>
+    </ion-item>
+    <ion-item button>
+      <ion-icon name="folder-outline"></ion-icon>
+    </ion-item>
+    <ion-textarea [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem" #txtaMsg></ion-textarea>
+    <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon></ion-item>
+  </ion-item>
+</ion-footer>
