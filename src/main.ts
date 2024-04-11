@@ -1,4 +1,4 @@
-import { APP_INITIALIZER, enableProdMode } from '@angular/core';
+import { enableProdMode, importProvidersFrom } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { RouteReuseStrategy, provideRouter } from '@angular/router';
 import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalone';
@@ -6,9 +6,12 @@ import { IonicRouteStrategy, provideIonicAngular } from '@ionic/angular/standalo
 import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 import { environment } from './environments/environment';
-import { XmppService } from './app/shared/services/xmpp/xmpp.service';
-import { XmppServicesService } from './app/shared/services/xmpp-services/xmpp-services.service';
 import { provideHttpClient } from '@angular/common/http';
+
+import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
+
+import { Drivers } from '@ionic/storage';
+import { IonicStorageModule } from '@ionic/storage-angular';
 
 if (environment.production) {
   enableProdMode();
@@ -19,6 +22,12 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes),
-    provideHttpClient()
+    provideHttpClient(),
+    importProvidersFrom(
+      IonicStorageModule.forRoot({
+        name: '__vibechatDb',
+        driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
+      })
+    )
   ],
 });
