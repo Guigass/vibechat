@@ -1,11 +1,6 @@
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
 import { RosterService } from './../../shared/services/roster/roster.service';
-import {
-  Component,
-  OnDestroy,
-  OnInit,
-  inject,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -19,6 +14,8 @@ import {
   IonFooter,
   IonItem,
   IonIcon,
+  IonImg,
+  IonAvatar,
 } from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
 import { ChatService } from 'src/app/shared/services/chat/chat.service';
@@ -26,9 +23,8 @@ import { MessageModel } from 'src/app/shared/models/message.model';
 import { MessageBubbleComponent } from 'src/app/shared/components/message-bubble/message-bubble.component';
 import { addIcons } from 'ionicons';
 import { send, happyOutline, folderOutline } from 'ionicons/icons';
-import { PresenceModel } from 'src/app/shared/models/presence.model';
-import { PresenceService } from 'src/app/shared/services/presence/presence.service';
 import { ContactModel } from 'src/app/shared/models/contact.model';
+import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 
 @Component({
   selector: 'app-chat',
@@ -36,6 +32,8 @@ import { ContactModel } from 'src/app/shared/models/contact.model';
   styleUrls: ['./chat.page.scss'],
   standalone: true,
   imports: [
+    IonAvatar,
+    IonImg,
     IonIcon,
     IonItem,
     IonFooter,
@@ -48,18 +46,17 @@ import { ContactModel } from 'src/app/shared/models/contact.model';
     IonMenuButton,
     IonButton,
     MessageBubbleComponent,
+    AvatarComponent
   ],
 })
 export class ChatPage implements OnInit, OnDestroy {
-
   mensagens!: MessageModel;
-  jid!: string ;
-  user!: ContactModel| null;
+  jid!: string;
+  user!: ContactModel | null;
 
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatService = inject(ChatService);
-  private rosterService = inject(RosterService);
   private contactRepository = inject(ContactRepository);
 
   constructor() {
@@ -83,18 +80,26 @@ export class ChatPage implements OnInit, OnDestroy {
     }
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.user = contact;
-      console.log(this.user);
-    })
+    });
+    this.getUserOutlineColor();
   }
 
+  getUserOutlineColor(): string {
+    if (this.user?.presence?.type === 'online') {
+      return 'green';
+    } else if (this.user?.presence?.type === 'offline') {
+      return 'red';
+    } else {
+      return 'yellow';
+    }
+  }
   sendMessage(msg: any) {
-    if (!msg) {
+    if (!msg || msg.value === '') {
       return;
     }
     this.chatService.sendMessage(msg.value, this.jid).subscribe();
-
+    console.log(this.mensagens);
   }
-
 
   ngOnDestroy(): void {}
 }
