@@ -31,15 +31,25 @@ export class ChatRepository {
   sendMessage(body: string, to: string): Observable<MessageModel> {
     return this.chatService.sendMessage(body, to).pipe(
       switchMap(message => {
-        console.log(message);
         return this.saveMessage(message);
+      }),
+      tap((message) => {
+        this.messages$.next(message);
       })
     );
   }
 
   private saveMessage(message: MessageModel): Observable<MessageModel> {
     const key = this.getMessageKeyPrefix(message.from, message.to);
-    return this.db.addData(`${key}_d:${message.timestamp.toISOString()}`, message);
+    const keyDate = `${key}_d:${message.timestamp.toISOString()}`;
+
+    message.dbKey = keyDate;
+
+    return this.db.addData(keyDate, message);
+  }
+
+  private updateMessage(message: MessageModel): Observable<MessageModel> {
+    return this.db.addData(message.dbKey!, message);
   }
 
   private getMessageKeyPrefix(contact1: string, contact2?: string): string {
@@ -53,6 +63,7 @@ export class ChatRepository {
 
   private watchforNewMessages(): void {
     this.chatService.onMessage().subscribe((message) => {
+      console.log('New message', message);
       this.saveMessage(message).subscribe();
 
       this.messages$.next(message);
@@ -74,7 +85,7 @@ export class ChatRepository {
   
         keysData.sort((a, b) => (a.data > b.data ? -1 : 1));
 
-        return this.db.getData(keysData[0].key).pipe(tap((message) => {console.log(message)}));
+        return this.db.getData(keysData[0].key);
       })
     );
   }
@@ -85,9 +96,30 @@ export class ChatRepository {
     return this.db.getAllData(key);
   }
 
+  getQtdUnreadMessages(contact: string): Observable<number> {
+    return this.getMessages(contact).pipe(
+      switchMap((messages) => {
+        return of(messages.filter((message) => message.read === false).length);
+      })
+    );
+  }
+
+  getSetMessagesAsRead(contact: string): Observable<MessageModel[]> {
+    return this.getMessages(contact).pipe(
+      switchMap((messages) => {
+        messages.forEach((message) => {
+          message.read = true;
+          this.updateMessage(message).subscribe();
+        });
+
+        return of(messages);
+      })
+    );
+   
+  };
+
   watchUserTypingState(){
     this.chatService.isTyping().subscribe((typing) => {
-      console.log(typing);
       this.contactRepository.getContact(typing.jid).subscribe((contact) => {
         if(contact){
           contact.isTyping = typing.isTyping;
@@ -95,5 +127,9 @@ export class ChatRepository {
         }
       });
     });
+  }
+
+  sendTypingState(to: string, isTyping: boolean){
+    return this.chatService.setTyping(to, isTyping);
   }
 }

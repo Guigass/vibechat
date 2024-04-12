@@ -1,15 +1,17 @@
 <ion-header>
   <ion-toolbar>
     <ion-item>
-      <app-avatar [user]="user"></app-avatar>
+      <app-avatar [user]="contact"></app-avatar>
       <ion-title>
-        {{user?.name}}
+        {{contact?.name}}
       </ion-title>
     </ion-item>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding" *ngIf="mensagens">
-  <app-message-bubble [message]="mensagens"></app-message-bubble>
+<ion-content class="ion-padding" *ngIf="mensages">
+  <div *ngFor="let msg of mensages">
+    <app-message-bubble [message]="msg"></app-message-bubble>
+  </div>
 </ion-content>
 <ion-footer>
   <ion-item class="container">
@@ -19,7 +21,7 @@
     <ion-item button>
       <ion-icon name="folder-outline"></ion-icon>
     </ion-item>
-    <ion-textarea [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem" #txtaMsg></ion-textarea>
+    <ion-textarea (ionInput)="typing($event)" [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem" #txtaMsg></ion-textarea>
     <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon></ion-item>
   </ion-item>
 </ion-footer>

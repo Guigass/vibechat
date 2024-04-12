@@ -11,8 +11,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
-import { ChatRepository } from '../../repositories/chat/chat.repository';
 import { AvatarComponent } from '../avatar/avatar.component';
+import { ChatRepository } from '../../repositories/chat/chat.repository';
+import { XmppService } from '../../services/xmpp/xmpp.service';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -36,14 +37,14 @@ import { AvatarComponent } from '../avatar/avatar.component';
 export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() contact!: ContactModel;
 
-  private chatService = inject(ChatService);
+  public xmpp = inject(XmppService);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
 
   private contactSubscription!: Subscription;
   private messagesSubscription!: Subscription;
 
-
+  unreadMessages = 0;
   lastMessage!: MessageModel | null;
 
   constructor() {
@@ -64,9 +65,9 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
         this.lastMessage = message;
       });
 
-      this.chatRepository.getMessages(this.contact.jid).subscribe((messages) => {
-        console.log(messages);
-      })
+      this.chatRepository.getQtdUnreadMessages(this.contact.jid).subscribe((qtd) => {
+        this.unreadMessages = qtd;
+      });
     });
   }
 

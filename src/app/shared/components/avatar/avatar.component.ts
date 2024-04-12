@@ -3,6 +3,7 @@ import { ContactModel } from '../../models/contact.model';
 import { IonAvatar } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { IonImg } from '@ionic/angular/standalone';
+import { AvatarColorPipe } from 'src/app/shared/pipes/avatar-color/avatar-color.pipe';
 
 @Component({
   selector: 'app-avatar',
@@ -12,26 +13,10 @@ import { IonImg } from '@ionic/angular/standalone';
   imports: [
     IonAvatar,
     CommonModule,
-    IonImg
+    IonImg,
+    AvatarColorPipe
   ]
 })
-export class AvatarComponent  implements OnInit {
+export class AvatarComponent {
   @Input() user: ContactModel | null | undefined;
-
-  constructor() { }
-
-  ngOnInit() {
-
-    this.getUserOutlineColor();
-  }
-  getUserOutlineColor(): string {
-    if (this.user?.presence?.type === 'online') {
-      return 'green';
-    } else if (this.user?.presence?.type === 'offline') {
-      return 'red';
-    } else {
-      return 'yellow';
-    }
-
-  }
 }

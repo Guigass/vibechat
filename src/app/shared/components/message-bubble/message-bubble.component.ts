@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { MessageModel } from '../../models/message.model';
 import { CommonModule } from '@angular/common';
+import { ChatRepository } from '../../repositories/chat/chat.repository';
 
 @Component({
   selector: 'app-message-bubble',
@@ -9,12 +10,8 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
 })
-export class MessageBubbleComponent  implements OnInit {
-  @Input() message!: MessageModel ;
+export class MessageBubbleComponent {
+  @Input() message!: MessageModel;
 
   constructor() { }
-
-  ngOnInit() {
-  }
-
 }
