@@ -11,12 +11,5 @@ import { CommonModule } from '@angular/common';
     imports: [IonContent, LoginComponent, CommonModule]
 })
 export class LoginPage {
-    showSplashScreen: boolean = true;
 
-    constructor() {
-    }
-
-    hideSplashScreen(evt: any) {
-        this.showSplashScreen = false;
-    }
 }

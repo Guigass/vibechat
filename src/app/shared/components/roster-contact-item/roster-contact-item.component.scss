@@ -1,0 +1,25 @@
+ion-avatar {
+  min-width: 35px;
+  min-height: 35px;
+  width: 35px;
+  height: 35px;
+  outline: 1.5px solid;
+  margin-left: 5px;
+}
+
+.contact-list {
+  width: 400px;
+  margin-left: 15px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+
+  small {
+    opacity: 0.6;
+  }
+}
+
+.selected {
+  --background: #272727;
+}

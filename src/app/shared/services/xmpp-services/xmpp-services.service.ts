@@ -10,15 +10,15 @@ import { XmppServicesModel } from '../../models/xmpp-services.model';
 export class XmppServicesService {
   private xmppService = inject(XmppService);
 
-  private servicesSource = new ReplaySubject<XmppServicesModel[]>(1); // 1 indica que ele vai reter o último valor
+  private servicesSource = new ReplaySubject<XmppServicesModel[]>(1);
   public services$ = this.servicesSource.asObservable();
 
   constructor() {
     if (this.xmppService.isConnected) {
-      this.discoverServices();
+      this.discoverServices().subscribe();
     } else {
       this.xmppService.onOnline$.subscribe(() => {
-        this.discoverServices();
+        this.discoverServices().subscribe();
       });
     }
 

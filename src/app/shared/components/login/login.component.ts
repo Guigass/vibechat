@@ -1,33 +1,36 @@
+import { SplashScreenService } from './../../services/splash-screen/splash-screen.service';
 import { UserPreferenceService } from './../../services/user-preference/user-preference.service';
 import { Component, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { IonContent, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonRow, IonCol, IonButton, IonInput, IonText, ToastController, IonCheckbox, IonLabel, IonItem, IonIcon, NavController, LoadingController, IonLoading } from "@ionic/angular/standalone";
 import { AuthService } from '../../services/auth/auth.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LoginModel } from '../../models/login.model';
-import { PreferencesKey } from '../../enums/preferences.enun';
-import { addIcons } from 'ionicons';
-import { eye, eyeOff, time } from 'ionicons/icons';
+import { PreferencesKey } from '../../enums/preferences.enum';
 import { of, switchMap, map, take, Observable, timer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
-import { StorageService } from '../../services/storage/storage.service';
 import { CommonModule } from '@angular/common';
+
+import { addIcons } from 'ionicons';
+import { eye, eyeOff } from 'ionicons/icons';
+import { WebStorageService } from '../../services/web-storage/web-storage.service';
+import { StorageType } from '../../enums/storage-type.enum';
 
 @Component({
   selector: 'app-login-component',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [IonIcon, IonLabel, 
-    IonText, 
-    IonInput, 
-    IonButton, 
-    IonCol, 
-    IonRow, 
-    IonCardContent, 
-    IonCardTitle, 
-    IonContent, 
-    IonCard, 
-    IonCardHeader, 
+  imports: [IonIcon, IonLabel,
+    IonText,
+    IonInput,
+    IonButton,
+    IonCol,
+    IonRow,
+    IonCardContent,
+    IonCardTitle,
+    IonContent,
+    IonCard,
+    IonCardHeader,
     ReactiveFormsModule,
     IonCheckbox,
     IonItem,
@@ -37,13 +40,12 @@ import { CommonModule } from '@angular/common';
   ]
 })
 export class LoginComponent implements OnInit {
-  @Output() innitFinish = new EventEmitter<boolean>();
-
   private authService = inject(AuthService);
   private xmppService = inject(XmppService);
-  private storageService = inject(StorageService);
+  private webStorageService = inject(WebStorageService);
   private navController = inject(NavController);
   private toastController = inject(ToastController);
+  private splashScreenService = inject(SplashScreenService);
 
   loginForm = new FormGroup({
     server: new FormControl('', Validators.required),
@@ -72,10 +74,16 @@ export class LoginComponent implements OnInit {
   }
 
   loadPreferences(){
-    const preferences = this.storageService.getItem<LoginModel>(PreferencesKey.UserCredentials);
+    const preferences = this.webStorageService.getItem<LoginModel>(PreferencesKey.UserCredentials, StorageType.Local);
 
     if(preferences?.rememberMe){
-      this.loginForm.setValue(preferences);
+      this.loginForm.setValue({
+        server: preferences.server,
+        username: preferences.username,
+        rememberMe: preferences.rememberMe,
+        autoLogin: preferences.autoLogin,
+        password: '',
+      });
     }
   }
 
@@ -85,7 +93,7 @@ export class LoginComponent implements OnInit {
     if(this.loginForm.valid) {
       this.processLogin(this.authService.login(this.loginForm.value as LoginModel))
     }
-   
+
   }
 
   processLogin(login: Observable<boolean>, autoLogin = false){
@@ -102,7 +110,7 @@ export class LoginComponent implements OnInit {
 
             this.loadingMessage = 'Ops, deu errado.';
           }
-          
+
           return of(false);
         }
 
@@ -120,13 +128,13 @@ export class LoginComponent implements OnInit {
       })
     ).subscribe((logged) => {
       if(logged){
-        this.navController.navigateRoot('/home');
+        this.navController.navigateRoot('/');
       } else {
-        this.innitFinish.emit(true);
+        this.splashScreenService.hide();
       }
     })
-    .add(() => { 
-      this.isLoading = false; 
+    .add(() => {
+      this.isLoading = false;
     });
   }
 

@@ -1,11 +1,6 @@
-<div class="splash-screen" *ngIf="showSplashScreen">
-  <div class="logo">VibeChat</div>
-  <div class="message">Preparando nossos emojis para a ação... 😎🚀</div>
-</div>
-
 <ion-content  class="page">
   <div class="card">
     <img src="https://fakeimg.pl/150x50" alt="">
-      <app-login-component (innitFinish)="hideSplashScreen($event)"></app-login-component>
+      <app-login-component></app-login-component>
   </div>
 </ion-content>

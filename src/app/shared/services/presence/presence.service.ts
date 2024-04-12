@@ -20,6 +20,32 @@ export class PresenceService {
     return this.xmppService.sendStanza(presenceStanza);
   }
 
+  getPresences(): Observable<PresenceModel> {
+    return this.xmppService.onStanza$.pipe(
+      filter(stanza => stanza.is('presence')),
+      filter(stanza => stanza.attrs.from),
+      map(stanza => {
+        const jid = stanza.attrs.from.split('/')[0];
+        const type = stanza.attrs.type;
+        if (type ===  'unavailable') {
+          return { type: PresenceType.Offline, jid: jid};
+        }
+
+        const status = stanza.getChild('status')?.getText();
+        if (status == 'Online') {
+          return { type: PresenceType.Online, jid: jid};
+        }
+
+        const presenceType = stanza.getChild('show');
+        if (presenceType) {
+          return { type: presenceType.getText() as PresenceType, jid: jid, status: status };
+        } else {
+          return { type: PresenceType.Offline, jid: jid, status: status };
+        }
+      })
+    );
+  }
+
   getPresenceFromUser(jid: string): Observable<PresenceModel> {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('presence')),
@@ -38,9 +64,9 @@ export class PresenceService {
         const presenceType = stanza.getChild('show');
         if (presenceType) {
           return { type: presenceType.getText() as PresenceType, jid: jid, status: status };
+        } else {
+          return { type: PresenceType.Offline, jid: jid, status: status };
         }
-
-        return { type: presenceType, status: status, jid: jid};
       })
     );
   }
