@@ -22,6 +22,10 @@ export class ContactRepository {
     this.init();
   }
 
+  public getContact(jid: string): Observable<ContactModel | null> {
+    return this.db.getData(`c_${jid}`);
+  }
+
   private init() {
     this.watchForPresenceUpdates();
 
