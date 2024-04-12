@@ -22,9 +22,11 @@ export class RosterGroupComponent implements OnChanges{
 
   ngOnChanges(changes: SimpleChanges): void {
     if(changes['search'].firstChange === false && changes['search'].currentValue !== ''){
-      this.isSearching = true;
+      
       const searchResult = this.rosterGroup?.contacts.filter(contact => contact.name.toLowerCase().includes(changes['search'].currentValue.toLowerCase()));
       this.open = searchResult && searchResult.length > 0;
+      
+      this.isSearching = true;
 
       this.rosterGroup?.contacts.forEach(contact => {
         if(searchResult?.findIndex(search => search.jid === contact.jid) === -1){
