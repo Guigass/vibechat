@@ -25,10 +25,10 @@ export class RosterRepository {
       this.rosterList$.next(rosterList);
     });
 
-    this.updateRosterList();
+    this.watchForRosterUpdates();
   }
 
-  private updateRosterList() {
+  private watchForRosterUpdates() {
     this.rosterService.requestRoster().subscribe();
 
     this.rosterService.getRosterList()

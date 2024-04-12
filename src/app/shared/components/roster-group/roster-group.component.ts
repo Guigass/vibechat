@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { ContactGroupModel } from '../../models/contact-group.model';
 import { RosterContactItemComponent } from '../../components/roster-contact-item/roster-contact-item.component';
 import { IonAccordionGroup, IonAccordion, IonLabel, IonItem, IonList } from "@ionic/angular/standalone";
+import { SortOnlinePipe } from '../../pipes/sort-online/sort-online.pipe';
 
 @Component({
   selector: 'app-roster-group',
   templateUrl: './roster-group.component.html',
   styleUrls: ['./roster-group.component.scss'],
   standalone: true,
-  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent],
+  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent, SortOnlinePipe],
 })
 export class RosterGroupComponent implements OnChanges{
   @Input() rosterGroup?: ContactGroupModel;

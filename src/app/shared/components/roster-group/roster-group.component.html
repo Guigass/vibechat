@@ -1,10 +1,10 @@
-<ion-accordion-group [value]="open ? index:''">
+<ion-accordion-group [value]="open ? index:''" *ngIf="rosterGroup">
   <ion-accordion [value]="index">
     <ion-item slot="header">
-      <ion-label>{{rosterGroup?.name}}</ion-label>
+      <ion-label>{{rosterGroup.name}}</ion-label>
     </ion-item>
 
-    <div slot="content" *ngFor="let contact of rosterGroup?.contacts">
+    <div slot="content" *ngFor="let contact of rosterGroup.contacts | sortOnline">
       <app-roster-contact-item [contact]="contact" [hidden]="contact.hidden"></app-roster-contact-item>
     </div>
   </ion-accordion>
