@@ -1,7 +1,7 @@
 import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import { Injectable, inject } from '@angular/core';
 import { Storage } from '@ionic/storage-angular';
-import { BehaviorSubject, Observable, concatMap, defer, filter, from, map, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, concatMap, defer, filter, from, map, of, switchMap, tap, zip } from 'rxjs';
 import { EncryptService } from '../encrypt/encrypt.service';
 
 @Injectable({
@@ -46,6 +46,10 @@ export class DatabaseService {
   }
 
   getData(key: string): Observable<any> {
+    if (key.startsWith(this.userPrefix)){
+      key = key.replace(this.userPrefix, '');
+    }
+
     return this.storageReady.pipe(
       filter((ready: boolean) => ready === true),
       switchMap(() => {
@@ -57,6 +61,33 @@ export class DatabaseService {
         } else {
           return null;
         }
+      })
+    );
+  }
+
+  getAllDataKeys(prefix: string): Observable<string[]> {
+    return this.storageReady.pipe(
+      filter((ready: boolean) => ready === true),
+      switchMap(() => {
+        return from(this.storage.keys());
+      }),
+      map((keys: string[]) => {
+        return keys.filter(key => key.startsWith(this.prefixKey(prefix)));
+      }),
+    );
+  }
+
+  getAllData(prefix: string): Observable<any[]> {
+    return this.storageReady.pipe(
+      filter((ready: boolean) => ready === true),
+      switchMap(() => {
+        return from(this.storage.keys());
+      }),
+      map((keys: string[]) => {
+        return keys.filter(key => key.startsWith(this.prefixKey(prefix)));
+      }),
+      switchMap((keys: string[]) => {
+        return zip(keys.map(key => this.getData(key)));
       })
     );
   }

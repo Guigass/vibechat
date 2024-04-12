@@ -26,6 +26,8 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(
       IonicStorageModule.forRoot({
         name: '__vibechatDb',
+        storeName: 'vibechat',
+        version: 1,
         driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
       })
     )

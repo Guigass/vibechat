@@ -26,10 +26,16 @@ export class ContactRepository {
     return this.db.getData(`c_${jid}`);
   }
 
+  public updateContact(contact: ContactModel): Observable<ContactModel> {
+    return this.db.addData(`c_${contact.jid}`, contact).pipe(tap(() => {
+      this.contactUpdate$.next(contact);
+    }));
+  }
+
   private init() {
     this.watchForPresenceUpdates();
 
-    timer(0, 2000).subscribe(() => {
+    timer(3000).subscribe(() => {
       this.updateContacts();
     })
   }

@@ -74,24 +74,12 @@ export class ChatPage implements OnInit, OnDestroy {
       this.jid = jidquery;
       this.chatService.getMessagesHistory(this.jid).subscribe((messages) => {
         this.mensagens = messages;
-        console.log(this.mensagens);
       });
       this.chatService.requestMessagesHistory(this.jid, 10).subscribe();
     }
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.user = contact;
-    });
-    this.getUserOutlineColor();
-  }
-
-  getUserOutlineColor(): string {
-    if (this.user?.presence?.type === 'online') {
-      return 'green';
-    } else if (this.user?.presence?.type === 'offline') {
-      return 'red';
-    } else {
-      return 'yellow';
-    }
+    })
   }
   sendMessage(msg: any) {
     if (!msg || msg.value === '') {

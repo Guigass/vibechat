@@ -1,5 +1,5 @@
 import { ChatService } from './../../services/chat/chat.service';
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { PresenceService } from '../../services/presence/presence.service';
 import { ContactModel } from '../../models/contact.model';
 import { Subscription, filter } from 'rxjs';
@@ -11,6 +11,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
+import { ChatRepository } from '../../repositories/chat/chat.repository';
 import { AvatarComponent } from '../avatar/avatar.component';
 
 @Component({
@@ -32,17 +33,18 @@ import { AvatarComponent } from '../avatar/avatar.component';
     AvatarComponent
   ]
 })
-export class RosterContactItemComponent implements OnInit, OnDestroy {
+export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() contact!: ContactModel;
 
-  private presenceService = inject(PresenceService);
   private chatService = inject(ChatService);
+  private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
 
-  private presenceSubscription!: Subscription;
   private contactSubscription!: Subscription;
+  private messagesSubscription!: Subscription;
 
-  lastMessage!: MessageModel;
+
+  lastMessage!: MessageModel | null;
 
   constructor() {
     addIcons({
@@ -51,21 +53,35 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
     })
   }
 
+
   ngOnInit() {
     this.contactSubscription = this.contactRepository.contactUpdate.pipe(
       filter((contact) => contact != null && contact.jid === this.contact.jid)
     ).subscribe((contact) => {
       this.contact = contact!;
-    });
 
-    this.chatService.getMessagesHistory(this.contact.jid).subscribe((message) => {
+      this.chatRepository.getLastMessage(this.contact.jid).subscribe((message) => {
+        this.lastMessage = message;
+      });
+
+      this.chatRepository.getMessages(this.contact.jid).subscribe((messages) => {
+        console.log(messages);
+      })
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.messagesSubscription = this.chatRepository.messages.pipe(
+      filter((message) => message != null),
+      filter((message) => message?.from === this.contact.jid || message?.to === this.contact.jid)
+    ).subscribe((message) => {
       this.lastMessage = message;
     });
-
-    this.chatService.requestMessagesHistory(this.contact.jid, 1).subscribe();
   }
+
   ngOnDestroy(): void {
-    this.presenceSubscription?.unsubscribe();
+    this.contactSubscription?.unsubscribe();
+    this.messagesSubscription?.unsubscribe();
   }
 }
 
