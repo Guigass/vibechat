@@ -13,6 +13,7 @@ import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ChatRepository } from '../../repositories/chat/chat.repository';
+import { XmppService } from '../../services/xmpp/xmpp.service';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -36,14 +37,14 @@ import { ChatRepository } from '../../repositories/chat/chat.repository';
 export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() contact!: ContactModel;
 
-  private chatService = inject(ChatService);
+  public xmpp = inject(XmppService);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
 
   private contactSubscription!: Subscription;
   private messagesSubscription!: Subscription;
 
-
+  unreadMessages = 0;
   lastMessage!: MessageModel | null;
 
   constructor() {
@@ -62,6 +63,10 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
 
       this.chatRepository.getLastMessage(this.contact.jid).subscribe((message) => {
         this.lastMessage = message;
+      });
+
+      this.chatRepository.getQtdUnreadMessages(this.contact.jid).subscribe((qtd) => {
+        this.unreadMessages = qtd;
       });
     });
   }

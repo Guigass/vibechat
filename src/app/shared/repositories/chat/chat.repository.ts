@@ -32,6 +32,9 @@ export class ChatRepository {
     return this.chatService.sendMessage(body, to).pipe(
       switchMap(message => {
         return this.saveMessage(message);
+      }),
+      tap((message) => {
+        this.messages$.next(message);
       })
     );
   }
@@ -52,6 +55,7 @@ export class ChatRepository {
 
   private watchforNewMessages(): void {
     this.chatService.onMessage().subscribe((message) => {
+      console.log('New message', message);
       this.saveMessage(message).subscribe();
 
       this.messages$.next(message);
@@ -84,6 +88,14 @@ export class ChatRepository {
     return this.db.getAllData(key);
   }
 
+  getQtdUnreadMessages(contact: string): Observable<number> {
+    return this.getMessages(contact).pipe(
+      switchMap((messages) => {
+        return of(messages.filter((message) => message.read === false).length);
+      })
+    );
+  }
+
   watchUserTypingState(){
     this.chatService.isTyping().subscribe((typing) => {
       this.contactRepository.getContact(typing.jid).subscribe((contact) => {
@@ -93,5 +105,9 @@ export class ChatRepository {
         }
       });
     });
+  }
+
+  sendTypingState(to: string, isTyping: boolean){
+    return this.chatService.setTyping(to, isTyping);
   }
 }

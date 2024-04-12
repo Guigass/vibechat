@@ -2,7 +2,7 @@ import { xml } from '@xmpp/client';
 import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
-import { Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, throwError, timer } from 'rxjs';
+import { Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, tap, throwError, timer } from 'rxjs';
 import { MessageModel } from '../../models/message.model';
 
 @Injectable({
@@ -39,6 +39,7 @@ export class ChatService {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('message')),
       filter(stanza => stanza.attrs.to.split('/')[0] === this.xmppService.jid),
+      filter(stanza => stanza.getChildText('body')),
       filter(stanza => stanza.attrs.from),
       filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       map(stanza => {
@@ -52,7 +53,7 @@ export class ChatService {
 
         this.sendReceipt(from, messageId).subscribe();
 
-        return new MessageModel(from, to, body, timestamp, messageId, type);
+        return new MessageModel(from, to, body, timestamp, messageId, type, true, false);
       }));
   }
 
@@ -76,6 +77,15 @@ export class ChatService {
         return of({jid: from, isTyping: false});
       }),
       distinctUntilChanged());
+  }
+
+  setTyping(to: string, isTyping: boolean): Observable<any> {
+    var message =
+      xml('message', { to: to, type: 'chat', id: uuidv4() },
+      isTyping ? xml('composing', { xmlns: 'http://jabber.org/protocol/chatstates' }) : xml('paused', { xmlns: 'http://jabber.org/protocol/chatstates' }),
+    );
+
+    return this.xmppService.sendStanza(message);
   }
 
   onMessageFromUser(from: string): Observable<MessageModel> {

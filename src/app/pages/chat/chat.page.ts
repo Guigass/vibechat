@@ -1,5 +1,4 @@
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { RosterService } from './../../shared/services/roster/roster.service';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -18,13 +17,14 @@ import {
   IonAvatar,
 } from '@ionic/angular/standalone';
 import { ActivatedRoute } from '@angular/router';
-import { ChatService } from 'src/app/shared/services/chat/chat.service';
 import { MessageModel } from 'src/app/shared/models/message.model';
 import { MessageBubbleComponent } from 'src/app/shared/components/message-bubble/message-bubble.component';
 import { addIcons } from 'ionicons';
 import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
+import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
+import { Subject, debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -52,12 +52,15 @@ import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.compone
 export class ChatPage implements OnInit, OnDestroy {
   mensagens!: MessageModel;
   jid!: string;
-  user!: ContactModel | null;
+  contact!: ContactModel | null;
 
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
-  private chatService = inject(ChatService);
+  private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
+
+  private typingSubject = new Subject<void>();
+  private isTyping = false;
 
   constructor() {
     addIcons({
@@ -72,22 +75,27 @@ export class ChatPage implements OnInit, OnDestroy {
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
       this.jid = jidquery;
-      this.chatService.getMessagesHistory(this.jid).subscribe((messages) => {
-        this.mensagens = messages;
-      });
-      this.chatService.requestMessagesHistory(this.jid, 10).subscribe();
     }
-    this.contactRepository.getContact(this.jid).subscribe((contact) => {
-      this.user = contact;
-    });
     
+    this.contactRepository.getContact(this.jid).subscribe((contact) => {
+      this.contact = contact;
+    });
+
     this.getUserOutlineColor();
+
+    this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
+      if (this.isTyping && this.contact) {
+        this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
+      }
+
+      this.isTyping = false;
+    });
   }
 
   getUserOutlineColor(): string {
-    if (this.user?.presence?.type === 'online') {
+    if (this.contact?.presence?.type === 'online') {
       return 'green';
-    } else if (this.user?.presence?.type === 'offline') {
+    } else if (this.contact?.presence?.type === 'offline') {
       return 'red';
     } else {
       return 'yellow';
@@ -97,9 +105,20 @@ export class ChatPage implements OnInit, OnDestroy {
     if (!msg || msg.value === '') {
       return;
     }
-    this.chatService.sendMessage(msg.value, this.jid).subscribe();
-    console.log(this.mensagens);
+
+    this.chatRepository.sendMessage(msg.value, this.jid).subscribe();
   }
 
-  ngOnDestroy(): void {}
+  typing(event: any) {
+    if (!this.isTyping && this.contact) {
+      this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
+    }
+
+    this.isTyping = true;
+    this.typingSubject.next();
+  }
+
+  ngOnDestroy(): void {
+    this.typingSubject.complete();
+  }
 }
