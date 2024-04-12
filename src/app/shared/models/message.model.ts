@@ -9,7 +9,8 @@ export class MessageModel {
     type: 'received' | 'sent';
     ticked?: boolean;
     read?: boolean;
-
+    dbKey?: string;
+    
     constructor(from: string, to: string, body: string, timestamp: Date, messageId: string, type: 'received' | 'sent', ticked?: boolean, read?: boolean) {
         this.from = from;
         this.to = to;

@@ -1,3 +1,3 @@
-<ion-avatar [ngStyle]="{ 'outline-color': getUserOutlineColor() }">
+<ion-avatar [ngStyle]="{ 'outline-color': user?.presence?.type | avatarColor }">
   <ion-img src="/assets/images/user-ph.png"></ion-img>
 </ion-avatar>

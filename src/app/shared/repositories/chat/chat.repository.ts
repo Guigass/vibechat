@@ -41,7 +41,15 @@ export class ChatRepository {
 
   private saveMessage(message: MessageModel): Observable<MessageModel> {
     const key = this.getMessageKeyPrefix(message.from, message.to);
-    return this.db.addData(`${key}_d:${message.timestamp.toISOString()}`, message);
+    const keyDate = `${key}_d:${message.timestamp.toISOString()}`;
+
+    message.dbKey = keyDate;
+
+    return this.db.addData(keyDate, message);
+  }
+
+  private updateMessage(message: MessageModel): Observable<MessageModel> {
+    return this.db.addData(message.dbKey!, message);
   }
 
   private getMessageKeyPrefix(contact1: string, contact2?: string): string {
@@ -95,6 +103,20 @@ export class ChatRepository {
       })
     );
   }
+
+  getSetMessagesAsRead(contact: string): Observable<MessageModel[]> {
+    return this.getMessages(contact).pipe(
+      switchMap((messages) => {
+        messages.forEach((message) => {
+          message.read = true;
+          this.updateMessage(message).subscribe();
+        });
+
+        return of(messages);
+      })
+    );
+   
+  };
 
   watchUserTypingState(){
     this.chatService.isTyping().subscribe((typing) => {

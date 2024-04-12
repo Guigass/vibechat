@@ -24,7 +24,7 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, Subscription, debounceTime, filter, take } from 'rxjs';
 
 @Component({
   selector: 'app-chat',
@@ -50,7 +50,7 @@ import { Subject, debounceTime } from 'rxjs';
   ],
 })
 export class ChatPage implements OnInit, OnDestroy {
-  mensagens!: MessageModel;
+  mensages!: MessageModel[];
   jid!: string;
   contact!: ContactModel | null;
 
@@ -61,6 +61,8 @@ export class ChatPage implements OnInit, OnDestroy {
 
   private typingSubject = new Subject<void>();
   private isTyping = false;
+
+  messagesSubscription!: Subscription;;
 
   constructor() {
     addIcons({
@@ -81,8 +83,6 @@ export class ChatPage implements OnInit, OnDestroy {
       this.contact = contact;
     });
 
-    this.getUserOutlineColor();
-
     this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
       if (this.isTyping && this.contact) {
         this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
@@ -90,23 +90,29 @@ export class ChatPage implements OnInit, OnDestroy {
 
       this.isTyping = false;
     });
+
+    this.messagesSubscription = this.chatRepository.messages.pipe(
+      filter((message) => message != null),
+      filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
+    ).subscribe((message) => {
+      this.mensages.push(message!);
+    });
+
+    this.chatRepository.getSetMessagesAsRead(this.jid).pipe(take(1))
+    .subscribe((messages) => {
+      this.mensages = messages;
+    });
   }
 
-  getUserOutlineColor(): string {
-    if (this.contact?.presence?.type === 'online') {
-      return 'green';
-    } else if (this.contact?.presence?.type === 'offline') {
-      return 'red';
-    } else {
-      return 'yellow';
-    }
-  }
   sendMessage(msg: any) {
     if (!msg || msg.value === '') {
       return;
     }
 
-    this.chatRepository.sendMessage(msg.value, this.jid).subscribe();
+    this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
+      msg.value = '';
+      msg.setFocus();
+    });
   }
 
   typing(event: any) {
@@ -120,5 +126,6 @@ export class ChatPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.typingSubject.complete();
+    this.messagesSubscription?.unsubscribe();
   }
 }

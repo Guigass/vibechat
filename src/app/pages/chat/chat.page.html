@@ -8,8 +8,10 @@
     </ion-item>
   </ion-toolbar>
 </ion-header>
-<ion-content class="ion-padding" *ngIf="mensagens">
-  <app-message-bubble [message]="mensagens"></app-message-bubble>
+<ion-content class="ion-padding" *ngIf="mensages">
+  <div *ngFor="let msg of mensages">
+    <app-message-bubble [message]="msg"></app-message-bubble>
+  </div>
 </ion-content>
 <ion-footer>
   <ion-item class="container">
