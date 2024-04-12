@@ -37,6 +37,7 @@ export class ContactRepository {
 
   updateContactPresence(presence: PresenceModel): Observable<ContactModel> {
     return this.db.getData(`c_${presence.jid}`).pipe(
+      filter(contact => contact !== null),
       tap(contact => contact.presence = presence),
       switchMap(contact => this.db.addData(`c_${contact.jid}`, contact))
     );

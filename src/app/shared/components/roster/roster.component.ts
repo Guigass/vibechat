@@ -28,9 +28,15 @@ export class RosterComponent {
 
   rosterList: ContactGroupModel[] = [];
 
+  searchText: string = '';
+
   constructor() {
     this.rosterRepository.rosterList.subscribe((roster) => {
       this.rosterList = roster;
     });
+  }
+
+  search(evt: any){
+    this.searchText = evt.detail.value;
   }
 }

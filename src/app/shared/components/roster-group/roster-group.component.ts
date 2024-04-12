@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { ContactGroupModel } from '../../models/contact-group.model';
@@ -12,6 +12,34 @@ import { IonAccordionGroup, IonAccordion, IonLabel, IonItem, IonList } from "@io
   standalone: true,
   imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent],
 })
-export class RosterGroupComponent{
+export class RosterGroupComponent implements OnChanges{
   @Input() rosterGroup?: ContactGroupModel;
+  @Input() index?: number;
+  @Input() open?: boolean = false;
+  @Input() search?: string;
+
+  isSearching: boolean = false;
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes['search'].firstChange === false && changes['search'].currentValue !== ''){
+      this.isSearching = true;
+      const searchResult = this.rosterGroup?.contacts.filter(contact => contact.name.toLowerCase().includes(changes['search'].currentValue.toLowerCase()));
+      this.open = searchResult && searchResult.length > 0;
+
+      this.rosterGroup?.contacts.forEach(contact => {
+        if(searchResult?.findIndex(search => search.jid === contact.jid) === -1){
+          contact.hidden = true;
+        } else {
+          contact.hidden = false;
+        }
+      });
+    } else {
+      this.rosterGroup?.contacts.forEach(contact => {
+        contact.hidden = false;
+      });
+
+      this.open = false;
+      this.isSearching = false;
+    }
+  }
 }

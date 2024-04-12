@@ -6,4 +6,5 @@ export interface ContactModel {
     subscription?: string;
     groups: string[];
     presence?: PresenceModel;
+    hidden?: boolean;
 }

@@ -1,11 +1,11 @@
-<ion-accordion-group>
-  <ion-accordion>
+<ion-accordion-group [value]="index">
+  <ion-accordion [value]="open ? index:''">
     <ion-item slot="header">
       <ion-label>{{rosterGroup?.name}}</ion-label>
     </ion-item>
 
     <div slot="content" *ngFor="let contact of rosterGroup?.contacts">
-      <app-roster-contact-item  [contact]="contact"></app-roster-contact-item>
+      <app-roster-contact-item [contact]="contact" [hidden]="contact.hidden"></app-roster-contact-item>
     </div>
   </ion-accordion>
 </ion-accordion-group>
