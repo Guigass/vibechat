@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title></ion-title>
+    <ion-item>
+      <app-avatar [user]="user"></app-avatar>
+      <ion-title>
+        {{user?.name}}
+      </ion-title>
+    </ion-item>
   </ion-toolbar>
 </ion-header>
 <ion-content class="ion-padding" *ngIf="mensagens">
