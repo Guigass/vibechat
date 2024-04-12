@@ -11,6 +11,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
+import { AvatarComponent } from '../avatar/avatar.component';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -27,7 +28,8 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
     IonIcon,
     RouterLink,
     RouterLinkActive,
-    DataPipe
+    DataPipe,
+    AvatarComponent
   ]
 })
 export class RosterContactItemComponent implements OnInit, OnDestroy {
