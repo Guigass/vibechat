@@ -8,6 +8,8 @@ import { BehaviorSubject, ReplaySubject, Subject, defer, filter, from, of, take 
 export class XmppService {
   public domain!: string;
   public userName!: string;
+  public jid!: string;
+
   private xmpp!: Client;
 
   private onStanza = new ReplaySubject<any>();
@@ -37,6 +39,7 @@ export class XmppService {
 
     this.domain = domain;
     this.userName = username;
+    this.jid = username + '@' + domain;
 
     const loginParams = {
       service: service,

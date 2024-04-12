@@ -12,8 +12,8 @@ export class ChatService {
   private xmppService = inject(XmppService);
 
   sendMessage(body: string, to: string): Observable<any> {
-    var message = 
-    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    var message =
+    xml('message', { to: to, type: 'chat', id: uuidv4() },
     xml('body', {}, body),
     xml('markable', 'urn:xmpp:chat-markers:0'),
     xml('request', 'urn:xmpp:receipts'),
@@ -91,7 +91,10 @@ export class ChatService {
       // Filtra para processar apenas mensagens relevantes
       filter(stanza =>
         stanza.is('message') &&
-        stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.from.split('/')[0] === from &&
+        (
+          stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.from.split('/')[0] === from ||
+          stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.to.split('/')[0] === from
+        ) &&
         stanza.getChild('result', 'urn:xmpp:mam:2') != null
       ),
       map(stanza => {
@@ -111,8 +114,8 @@ export class ChatService {
   }
 
   sendReceipt(to: string, id: string): Observable<any> {
-    var message = 
-    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    var message =
+    xml('message', { to: to, type: 'chat', id: uuidv4() },
     xml('received', { xmlns: 'urn:xmpp:receipts', id: id }),
     );
 
@@ -120,8 +123,8 @@ export class ChatService {
   }
 
   sendReadReceipt(to: string, id: string): Observable<any> {
-    var message = 
-    xml('message', { to: to, type: 'chat', id: uuidv4() }, 
+    var message =
+    xml('message', { to: to, type: 'chat', id: uuidv4() },
     xml('displayed', { xmlns: 'urn:xmpp:chat-markers:0', id: id }),
     );
 
