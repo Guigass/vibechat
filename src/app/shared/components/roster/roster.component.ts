@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
 import { IonContent, IonSearchbar, IonList } from "@ionic/angular/standalone";
 import { take } from 'rxjs';
+import { ContactRepository } from '../../repositories/contact/contact.repository';
 
 @Component({
   selector: 'app-roster',
@@ -20,4 +21,5 @@ import { take } from 'rxjs';
 })
 export class RosterComponent {
   public rosterRepository = inject(RosterRepository);
+  public contactResposioty = inject(ContactRepository);
 }

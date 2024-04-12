@@ -1,6 +1,6 @@
 <ion-item button routerDirection="root" routerLinkActive="selected" [routerLink]="'/app/chat/' + contact.jid" *ngIf="contact">
   <ion-avatar
-    [ngStyle]=" contact.presence.type === 'online' ? { 'outline-color': 'green' } : { 'outline-color': 'red' }">
+    [ngStyle]=" contact.presence?.type === 'online' ? { 'outline-color': 'green' } : { 'outline-color': 'red' }">
     <ion-img src="../../assets/icon/person.png"></ion-img>
   </ion-avatar>
   <div class="contact-list">

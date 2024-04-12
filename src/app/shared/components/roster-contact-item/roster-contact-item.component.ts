@@ -2,14 +2,15 @@ import { ChatService } from './../../services/chat/chat.service';
 import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { PresenceService } from '../../services/presence/presence.service';
 import { ContactModel } from '../../models/contact.model';
-import { Subscription } from 'rxjs';
-import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem} from "@ionic/angular/standalone";
+import { Subscription, filter } from 'rxjs';
+import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
 import { personOutline, person } from 'ionicons/icons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
+import { ContactRepository } from '../../repositories/contact/contact.repository';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -34,8 +35,10 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
 
   private presenceService = inject(PresenceService);
   private chatService = inject(ChatService);
+  private contactRepository = inject(ContactRepository);
 
   private presenceSubscription!: Subscription;
+  private contactSubscription!: Subscription;
 
   lastMessage!: MessageModel;
 
@@ -47,11 +50,17 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.presenceSubscription = this.presenceService
-      .getPresenceFromUser(this.contact.jid)
-      .subscribe((presence) => {
-        this.contact.presence = presence;
-      });
+    this.contactSubscription = this.contactRepository.contactUpdate.pipe(
+      filter((contact) => contact != null && contact.jid === this.contact.jid)
+    ).subscribe((contact) => {
+      this.contact = contact!;
+    });
+
+    // this.presenceSubscription = this.presenceService
+    //   .getPresenceFromUser(this.contact.jid)
+    //   .subscribe((presence) => {
+    //     this.contact.presence = presence;
+    //   });
 
     this.chatService.getMessagesHistory(this.contact.jid).subscribe((message) => {
       this.lastMessage = message;

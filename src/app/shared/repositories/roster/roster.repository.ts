@@ -57,7 +57,6 @@ export class RosterRepository {
         contact.groups.forEach((userGroup: string) => {
           //Caso o contato não esteja na lista, adiciona
           let group = contactsGroups.find((g: ContactGroupModel) => g.name === userGroup);
-          console.log(group);
           if (!group) {
             if(userGroup){
               group = { name: userGroup, contacts: [contact] };

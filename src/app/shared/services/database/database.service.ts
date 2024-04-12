@@ -10,7 +10,8 @@ import { EncryptService } from '../encrypt/encrypt.service';
 export class DatabaseService {
   private storage =  inject(Storage);
   private encryptService =  inject(EncryptService);
-  private storageReady = new BehaviorSubject<boolean>(false);
+
+  public storageReady = new BehaviorSubject<boolean>(false);
 
   private userPrefix = 'app';
 
@@ -27,7 +28,7 @@ export class DatabaseService {
       this.userPrefix = 'app';
     }
 
-    this.userPrefix = `user_${userId}:`;
+    this.userPrefix = `_${userId}:`;
   }
 
   private prefixKey(key: string): string {
@@ -35,18 +36,21 @@ export class DatabaseService {
   }
 
   addData(key: string, value: any): Observable<any> {
-    value = this.encryptService.encrypt(value);
-    
+    const enctyptedValue = this.encryptService.encrypt(value);
+
     return this.storageReady.pipe(
       filter(ready => ready === true),
-      switchMap(() => from(this.storage.set(this.prefixKey(key), value))
-    ));
+      switchMap(() => from(this.storage.set(this.prefixKey(key), enctyptedValue))),
+      map(() => value)
+    );
   }
 
   getData(key: string): Observable<any> {
     return this.storageReady.pipe(
       filter((ready: boolean) => ready === true),
-      switchMap(() => this.storage.get(this.prefixKey(key))),
+      switchMap(() => {
+        return from(this.storage.get(this.prefixKey(key)));
+      }),
       map((value) => {
         if (value) {
           return this.encryptService.decrypt(value);
