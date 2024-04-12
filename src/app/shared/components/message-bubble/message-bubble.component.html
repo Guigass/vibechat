@@ -1,4 +1,17 @@
 
-  <p>
-    <strong>{{ message.from }}</strong> - {{ message.body }}
-  </p>
+  <div id="chat-container">
+    <!-- <div class="container">-->
+      <app-avatar></app-avatar>
+    <div class="bubble *ngIf='!message.from'">
+      <strong>{{ message.from }}</strong>
+        <p>{{ message.body }}</p>
+    <!-- </div> -->
+    </div>
+  <!-- <div class="container">-->
+    <div class="bubble right" *ngIf="message.to">
+      <app-avatar></app-avatar>
+       <strong>{{message.to}}</strong>
+        <p>{{message.body}}</p>
+    </div>
+  </div>
+  <!-- </div> -->
