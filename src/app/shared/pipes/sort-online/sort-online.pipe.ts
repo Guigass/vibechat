@@ -10,12 +10,11 @@ export class SortOnlinePipe implements PipeTransform {
   transform(value: ContactModel[]): any {
     if (!value) return value;
 
-    console.log(value);
     const online = value.filter(contact => contact.presence?.status === 'online');
     const offline = value.filter(contact => contact.presence?.status !== 'online');
 
     return online.concat(offline);
-    
+
   }
 
 }
