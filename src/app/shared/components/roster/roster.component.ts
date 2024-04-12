@@ -6,6 +6,8 @@ import { RosterGroupComponent } from '../roster-group/roster-group.component';
 import { IonContent, IonSearchbar, IonList } from "@ionic/angular/standalone";
 import { take } from 'rxjs';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
+import { SortPipe } from '../../pipes/sort/sort.pipe';
+import { ContactGroupModel } from '../../models/contact-group.model';
 
 @Component({
   selector: 'app-roster',
@@ -16,10 +18,19 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
     IonSearchbar,
     IonContent,
     CommonModule,
-    RosterGroupComponent
+    RosterGroupComponent,
+    SortPipe
   ],
 })
 export class RosterComponent {
   public rosterRepository = inject(RosterRepository);
   public contactResposioty = inject(ContactRepository);
+
+  rosterList: ContactGroupModel[] = [];
+
+  constructor() {
+    this.rosterRepository.rosterList.subscribe((roster) => {
+      this.rosterList = roster;
+    });
+  }
 }

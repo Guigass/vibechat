@@ -5,6 +5,7 @@ import { IonApp, IonSplitPane, IonMenu, IonContent, IonRouterOutlet, IonHeader, 
 import { AsideComponent } from 'src/app/shared/components/aside/aside.component';
 import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
 import { DatabaseService } from 'src/app/shared/services/database/database.service';
+import { debounceTime } from 'rxjs';
 
 @Component({
   selector: 'app-app',
@@ -28,7 +29,7 @@ export class AppPage {
   private splashScreenService = inject(SplashScreenService);
 
   constructor() {
-    this.db.init().subscribe((ready) => {
+    this.db.init().pipe(debounceTime(1000)).subscribe((ready) => {
       if (ready) {
         this.splashScreenService.hide();
       }

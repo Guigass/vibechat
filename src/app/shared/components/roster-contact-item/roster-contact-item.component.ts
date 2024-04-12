@@ -56,12 +56,6 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
       this.contact = contact!;
     });
 
-    // this.presenceSubscription = this.presenceService
-    //   .getPresenceFromUser(this.contact.jid)
-    //   .subscribe((presence) => {
-    //     this.contact.presence = presence;
-    //   });
-
     this.chatService.getMessagesHistory(this.contact.jid).subscribe((message) => {
       this.lastMessage = message;
     });

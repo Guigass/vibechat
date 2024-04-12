@@ -43,12 +43,10 @@ export class ContactRepository {
   }
 
   updateContacts() {
-    this.ngZone.runOutsideAngular(() => {
-      this.rosterRepository.rosterList.subscribe(roster => {
-        roster.forEach(group => {
-          group.contacts.forEach(contact => {
-            this.db.addData(`c_${contact.jid}`, contact).subscribe();
-          });
+    this.rosterRepository.rosterList.subscribe(roster => {
+      roster.forEach(group => {
+        group.contacts.forEach(contact => {
+          this.db.addData(`c_${contact.jid}`, contact).subscribe();
         });
       });
     });
