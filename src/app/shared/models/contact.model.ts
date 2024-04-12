@@ -7,4 +7,5 @@ export interface ContactModel {
     subscription?: string;
     presence?: PresenceModel;
     hidden?: boolean;
+    isTyping?: false;
 }

@@ -11,12 +11,14 @@ import { MessageModel } from '../../models/message.model';
 export class ChatService {
   private xmppService = inject(XmppService);
 
-  sendMessage(body: string, to: string): Observable<any> {
+  sendMessage(body: string, to: string): Observable<MessageModel> {
+    const id = uuidv4();
+
     var message =
-    xml('message', { to: to, type: 'chat', id: uuidv4() },
-    xml('body', {}, body),
-    xml('markable', 'urn:xmpp:chat-markers:0'),
-    xml('request', 'urn:xmpp:receipts'),
+      xml('message', { to: to, type: 'chat', id: uuidv4() },
+      xml('body', {}, body),
+      xml('markable', 'urn:xmpp:chat-markers:0'),
+      xml('request', 'urn:xmpp:receipts'),
     );
 
     return this.xmppService.sendStanza(message)
@@ -24,8 +26,56 @@ export class ChatService {
         catchError(error => {
           console.error('Erro ao enviar mensagem:', error);
           return throwError(() => new Error('Falha ao enviar mensagem'));
+        }),
+        map(() => { 
+          const msg = new MessageModel(this.xmppService.jid, to, body, new Date(), id, 'sent');
+          msg.read = true;
+          return msg;
         })
       );
+  }
+
+  onMessage() {
+    return this.xmppService.onStanza$.pipe(
+      filter(stanza => stanza.is('message')),
+      filter(stanza => stanza.attrs.to.split('/')[0] === this.xmppService.jid),
+      filter(stanza => stanza.attrs.from),
+      filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
+      map(stanza => {
+        const body = stanza.getChildText('body');
+        const timestamp = new Date();
+        const from = stanza.attrs.from.split('/')[0];
+        const to = stanza.attrs.to.split('/')[0];
+        const messageId = stanza.attrs.id;
+        
+        const type = 'received';
+
+        this.sendReceipt(from, messageId).subscribe();
+
+        return new MessageModel(from, to, body, timestamp, messageId, type);
+      }));
+  }
+
+  isTyping(): Observable<any> {
+    return this.xmppService.onStanza$.pipe(
+      filter(stanza => stanza.is('message')),
+      filter(stanza => stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') || stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
+      switchMap(stanza => {
+        const from = stanza.attrs.from.split('/')[0];
+
+        if (stanza.getChild('composing', 'http://jabber.org/protocol/chatstates')) {
+          return timer(5000).pipe(
+            map(() => {
+              return {jid: from, isTyping: false};
+            }),
+            startWith({jid: from, isTyping: true})
+          );
+        } else if (stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')) {
+          return of({jid: from, isTyping: false});
+        }
+        return of({jid: from, isTyping: false});
+      }),
+      distinctUntilChanged());
   }
 
   onMessageFromUser(from: string): Observable<MessageModel> {
@@ -86,6 +136,7 @@ export class ChatService {
 
     return this.xmppService.sendStanza(mamQuery);
   }
+
   getMessagesHistory(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
       // Filtra para processar apenas mensagens relevantes

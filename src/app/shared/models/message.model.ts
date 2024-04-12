@@ -5,17 +5,17 @@ export class MessageModel {
     to: string;
     body: string;
     timestamp: Date;
-    messageId: string;
+    id: string;
     type: 'received' | 'sent';
     ticked?: boolean;
-    received?: boolean;
+    read?: boolean;
 
     constructor(from: string, to: string, body: string, timestamp: Date, messageId: string, type: 'received' | 'sent') {
         this.from = from;
         this.to = to;
         this.body = body;
         this.timestamp = timestamp;
-        this.messageId = messageId;
+        this.id = messageId;
         this.type = type;
     }
 

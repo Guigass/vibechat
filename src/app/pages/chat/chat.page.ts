@@ -77,13 +77,11 @@ export class ChatPage implements OnInit, OnDestroy {
       this.jid = jidquery;
       this.chatService.getMessagesHistory(this.jid).subscribe((messages) => {
         this.mensagens = messages;
-        console.log(this.mensagens);
       });
       this.chatService.requestMessagesHistory(this.jid, 10).subscribe();
     }
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.user = contact;
-      console.log(this.user);
     })
   }
 
