@@ -61,10 +61,6 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
       this.chatRepository.getLastMessage(this.contact.jid).subscribe((message) => {
         this.lastMessage = message;
       });
-
-      this.chatRepository.getMessages(this.contact.jid).subscribe((messages) => {
-        console.log(messages);
-      })
     });
   }
 

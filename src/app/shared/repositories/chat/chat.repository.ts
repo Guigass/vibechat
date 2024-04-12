@@ -31,7 +31,6 @@ export class ChatRepository {
   sendMessage(body: string, to: string): Observable<MessageModel> {
     return this.chatService.sendMessage(body, to).pipe(
       switchMap(message => {
-        console.log(message);
         return this.saveMessage(message);
       })
     );
@@ -74,7 +73,7 @@ export class ChatRepository {
   
         keysData.sort((a, b) => (a.data > b.data ? -1 : 1));
 
-        return this.db.getData(keysData[0].key).pipe(tap((message) => {console.log(message)}));
+        return this.db.getData(keysData[0].key);
       })
     );
   }
@@ -87,7 +86,6 @@ export class ChatRepository {
 
   watchUserTypingState(){
     this.chatService.isTyping().subscribe((typing) => {
-      console.log(typing);
       this.contactRepository.getContact(typing.jid).subscribe((contact) => {
         if(contact){
           contact.isTyping = typing.isTyping;
