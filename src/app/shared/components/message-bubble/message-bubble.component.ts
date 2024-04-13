@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { ChatRepository } from '../../repositories/chat/chat.repository';
 import { IonItem } from "@ionic/angular/standalone";
 import { AvatarComponent } from '../avatar/avatar.component';
+import { ContactModel } from '../../models/contact.model';
+import { ContactRepository } from '../../repositories/contact/contact.repository';
 
 @Component({
   selector: 'app-message-bubble',
@@ -13,10 +15,19 @@ import { AvatarComponent } from '../avatar/avatar.component';
   imports: [IonItem, CommonModule,AvatarComponent],
 })
 export class MessageBubbleComponent implements OnInit {
+  private contactRepository = inject(ContactRepository);
   @Input() message!: MessageModel;
+  @Input() userId!:string;
+  public contact!:ContactModel | null;
 
   constructor() { }
 
-  ngOnInit(): void {console.log(this.message)};
+  ngOnInit(): void {
+    console.log(this.message)
+    this.contactRepository.getContact(this.userId).subscribe((contact) => {
+      this.contact = contact;
+      console.log(this.contact)
+    });
+  };
 
 }

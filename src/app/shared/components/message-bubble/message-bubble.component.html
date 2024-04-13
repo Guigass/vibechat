@@ -1,17 +1,40 @@
 
   <div id="chat-container">
-    <!-- <div class="container">-->
-      <app-avatar></app-avatar>
+      <!-- <app-avatar></app-avatar>
     <div class="bubble *ngIf='!message.from'">
       <strong>{{ message.from }}</strong>
         <p>{{ message.body }}</p>
-    <!-- </div> -->
+
     </div>
-  <!-- <div class="container">-->
     <div class="bubble right" *ngIf="message.to">
       <app-avatar></app-avatar>
        <strong>{{message.to}}</strong>
         <p>{{message.body}}</p>
+    </div> -->
+
+    <!-- ### Utilizer essa ####  -->
+    <div class="content" [ngClass]="message.from">
+      <app-avatar></app-avatar>
+      <div class="bubble">
+        <strong>
+          {{message.from}}
+        </strong>
+        <p>
+          {{message.body}}
+        </p>
+      </div>
+    </div>
+    <div class="content right" [ngClass]="message.to" >
+      <app-avatar></app-avatar>
+      <div class="bubble right">
+        <strong>
+          {{message.to}}
+        </strong>
+        <p>
+          {{message.body}}
+        </p>
+      </div>
     </div>
   </div>
-  <!-- </div> -->
+  <!-- ################### -->
+

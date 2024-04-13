@@ -5,25 +5,44 @@
   padding: 1rem;
 }
 
-// .container {
-//   display: flex;
-//   flex-direction: row;
-//   gap: 20px;
-//   align-items: center;
-// }
+.content{
+  display: flex;
+  gap:20px;
+  align-items: center;
+  p{
+    padding: 0;
+    margin: 0;
+  }
+}
+.content.right{
+  display: flex;
+  gap:20px;
+  align-items: center;
+  flex-direction: row-reverse;
+  p{
+    padding: 0;
+    margin: 0;
+  }
+}
 
-// app-avatar{
-//   margin-bottom: 5px;
-// }
+
+
+app-avatar{
+  margin-bottom: 5px;
+}
 .bubble {
+  padding: 0;
   border: solid 1px #ddd;
+  background: none;
   margin-bottom: 0.25rem;
   max-width: 40%;
   align-self: flex-start;
-  padding: 0.5rem;
-  padding: 0.5rem 0.7rem;
+  --inner-border-width: 0;
   border-radius: 0.75rem;
+  padding: 0.5rem 0.7rem;
   position: relative;
+  --background:transparent;
+
 }
 
 .bubble::after {
