@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Client, client, xml } from '@xmpp/client';
+import * as debug from '@xmpp/debug';
 import { ReplaySubject, Subject, defer, from, of } from 'rxjs';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -51,16 +53,19 @@ export class XmppService {
 
     this.xmpp = client(loginParams);
 
+    //debug(this.xmpp, true);
+
     this.xmpp.on('online', (address) => {
       this.isConnected = true;
 
-      this.xmpp.send(xml("presence"));
+      this.xmpp.send(xml("presence", {}, xml("status", {}, PresenceType.Online)));
 
       this.onOnline.next(address);
     });
 
     this.xmpp.on('offline', () => {
       this.isConnected = false;
+      this.xmpp.close();
 
       this.onOffline.next(null);
     });

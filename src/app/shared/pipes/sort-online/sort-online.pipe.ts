@@ -10,11 +10,13 @@ export class SortOnlinePipe implements PipeTransform {
   transform(value: ContactModel[]): any {
     if (!value) return value;
 
-    const online = value.filter(contact => contact.presence?.status === 'online');
-    const offline = value.filter(contact => contact.presence?.status !== 'online');
+    const online = value.filter(contact => contact.presence?.type?.toLocaleLowerCase() === 'online');
+    const other = value.filter(contact => contact.presence?.type && contact.presence?.type?.toLocaleLowerCase() !== 'online' && contact.presence?.type?.toLocaleLowerCase() !== 'offline');
+    const offline = value.filter(contact => contact.presence?.type?.toLocaleLowerCase() === 'offline' || !contact.presence?.type || contact.presence?.type?.toLocaleLowerCase() === 'unavailable');
 
-    return online.concat(offline);
+    const list = online.concat(other).concat(offline);
 
+    return list;
   }
 
 }
