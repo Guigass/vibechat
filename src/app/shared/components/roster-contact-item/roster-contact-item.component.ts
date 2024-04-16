@@ -2,11 +2,9 @@ import { ChatService } from './../../services/chat/chat.service';
 import { AfterViewInit, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { PresenceService } from '../../services/presence/presence.service';
 import { ContactModel } from '../../models/contact.model';
-import { Subscription, filter } from 'rxjs';
+import { Subscription, catchError, distinct, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
 import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
-import { addIcons } from 'ionicons';
-import { personOutline, person } from 'ionicons/icons';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
@@ -48,26 +46,24 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
   lastMessage!: MessageModel | null;
 
   constructor() {
-    addIcons({
-      personOutline,
-      person
-    })
   }
- 
 
   ngOnInit() {
     this.contactSubscription = this.contactRepository.contactUpdate.pipe(
-      filter((contact) => contact != null && contact.jid === this.contact.jid)
-    ).subscribe((contact) => {
-      this.contact = contact!;
-
-      this.chatRepository.getLastMessage(this.contact.jid).subscribe((message) => {
+      filter((contact) => contact != null && contact.jid === this.contact.jid),
+      switchMap(contact => {
+        this.contact = contact!;
+        return this.chatRepository.getLastMessage(this.contact.jid).pipe(
+          catchError(err => {
+            console.error('Erro ao obter a última mensagem:', err);
+            return of(null);
+          })
+        );
+      })
+    ).subscribe(message => {
+      if (message) {
         this.lastMessage = message;
-      });
-
-      this.chatRepository.getQtdUnreadMessages(this.contact.jid).subscribe((qtd) => {
-        this.unreadMessages = qtd;
-      });
+      }
     });
   }
 
