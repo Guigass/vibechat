@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, client, xml } from '@xmpp/client';
-import { BehaviorSubject, ReplaySubject, Subject, defer, filter, from, of, take } from 'rxjs';
+import { ReplaySubject, Subject, defer, from, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
