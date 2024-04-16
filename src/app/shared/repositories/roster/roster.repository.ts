@@ -4,16 +4,20 @@ import { RosterService } from '../../services/roster/roster.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { ContactGroupModel } from '../../models/contact-group.model';
 import { ContactModel } from '../../models/contact.model';
+import { Database2Service } from '../../services/database/database2.service';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RosterRepository {
-  private db = inject(DatabaseService);
+  //private db = inject(DatabaseService);
+  private db = inject(Database2Service);
+
   private rosterService = inject(RosterService);
   private ngZone = inject(NgZone);
 
-  private rosterList$: BehaviorSubject<ContactGroupModel[]> = new BehaviorSubject<ContactGroupModel[]>([]);
+  private rosterList$: ReplaySubject<ContactModel[]> = new ReplaySubject<ContactModel[]>();
   public rosterList = this.rosterList$.asObservable();
 
   constructor() {
@@ -21,58 +25,59 @@ export class RosterRepository {
   }
 
   private init() {
-    this.db.getData('roster').subscribe((rosterList) => {
-      this.rosterList$.next(rosterList);
+    this.db.contacts.toArray().then((contacts) => {
+      this.rosterList$.next(contacts);
+
+      this.getRosterList();
+      this.watchForRosterUpdates();
+    });
+  }
+
+  private getRosterList() {
+    this.rosterService.getRosterList().pipe(
+      take(1)
+    ).subscribe((contacts) => {
+      contacts.forEach((contact) => {
+        this.db.contacts.where('jid').equals(contact.jid).first().then(async (existContact) => {
+          if (!existContact) {
+            await this.db.contacts.add(contact);
+            await this.db.presences.add({jid: contact.jid, type: PresenceType.Offline, status: ''});
+            await this.db.contactsInfo.add({jid: contact.jid, fullname: contact.name, nickname: '', email: '', phone: '', givenName: '', familyName: '', avatar: ''});
+          }
+        });
+      })
+
+      this.rosterList$.next(contacts);
     });
 
-    this.watchForRosterUpdates();
+    this.rosterService.requestRoster().subscribe();
   }
 
   private watchForRosterUpdates() {
-    this.rosterService.requestRoster().subscribe();
-
-    this.rosterService.getRosterList()
-      .pipe(take(1))
-      .subscribe((contactsGroups) => {
-        this.db.addData('roster', contactsGroups).subscribe((resp) => {
-          this.rosterList$.next(contactsGroups);
-        });
-
-      });
-
-    this.rosterService.getTosterUpdate()
+    this.rosterService.getRosterUpdate()
       .subscribe((contact) => {
-        let contactsGroups = this.rosterList$.value;
-
-        //Caso o subscription do contato seja diferente de 'both' remove da lista
         if (contact.subscription !== 'both') {
-          contactsGroups.forEach((group: ContactGroupModel) => {
-            group.contacts = group.contacts.filter((c: ContactModel) => c.jid !== contact.jid);
-
-            //Caso o grupo esteja vazio remove o grupo da lista
-            if (group.contacts.length === 0) {
-              contactsGroups = contactsGroups.filter((g: ContactGroupModel) => g.name !== group.name);
+          this.db.contacts.where('jid').equals(contact.jid).first().then(async (existContact) => {
+            if (existContact) {
+              await this.db.contacts.delete(existContact.id!);
+              await this.db.presences.where('jid').equals(contact.jid).delete();
+              await this.db.contactsInfo.where('jid').equals(contact.jid).delete();
             }
           });
         } else {
-          contact.groups.forEach((userGroup: string) => {
-            //Caso o contato não esteja na lista, adiciona
-            let group = contactsGroups.find((g: ContactGroupModel) => g.name === userGroup);
-            if (!group) {
-              if (userGroup) {
-                group = { name: userGroup, contacts: [contact] };
-                contactsGroups.push(group);
-              }
+          this.db.contacts.where('jid').equals(contact.jid).first().then(async (existContact) => {
+            if (existContact) {
+              await this.db.contacts.update(existContact.id!, { ...contact });
             } else {
-              if (!group.contacts.find((c: ContactModel) => c.jid === contact.jid)) {
-                group.contacts.push(contact);
-              }
+              await this.db.contacts.add(contact);
+              await this.db.presences.add({jid: contact.jid, type: PresenceType.Offline, status: ''});
+              await this.db.contactsInfo.add({jid: contact.jid, fullname: contact.name, nickname: '', email: '', phone: '', givenName: '', familyName: '', avatar: ''});
             }
           });
         }
 
-        this.db.addData('roster', contactsGroups).subscribe((resp) => {
-          this.rosterList$.next(contactsGroups);
+        this.db.contacts.toArray().then((contacts) => {
+          this.rosterList$.next(contacts);
         });
       });
   }

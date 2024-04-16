@@ -7,6 +7,8 @@ import { RosterContactItemComponent } from '../../components/roster-contact-item
 import { IonAccordionGroup, IonAccordion, IonLabel, IonItem, IonList } from "@ionic/angular/standalone";
 import { SortOnlinePipe } from '../../pipes/sort-online/sort-online.pipe';
 import { filter } from 'rxjs';
+import { PresenceModel } from '../../models/presence.model';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Component({
   selector: 'app-roster-group',
@@ -28,15 +30,26 @@ export class RosterGroupComponent implements OnInit, OnChanges {
 
 
   ngOnInit(): void {
-    //Verifica se teve alteração em dos contatos do grupo para reordenar a lista
-    this.contactRepository.contactUpdate.pipe(
-      filter(contact => contact?.groups.includes(this.rosterGroup?.name ?? '') ?? false)
-    )
-    .subscribe(contact => {
-      //Acha o contact e atualiza ele
-      const index = this.rosterGroup?.contacts.findIndex(contact => contact.jid === contact?.jid);
-      if (index !== undefined && index !== -1) {
-        this.rosterGroup!.contacts[index] = contact!;
+    this.contactRepository.presenceUpdate.pipe(
+      filter(presence => this.rosterGroup?.contacts.findIndex(contact => contact.jid === presence!.jid) !== -1)
+    ).subscribe(presence => {
+      console.log(presence);
+      if (presence) {
+        const index = this.rosterGroup?.contacts.findIndex(contact => contact.jid === presence.jid);
+        if (index !== -1) {
+          this.rosterGroup!.contacts[index!].presence = presence;
+        }
+
+        //Order a lista pelos online e aways primeiro
+        this.rosterGroup?.contacts.sort((a, b) => {
+          if (a.presence?.type === PresenceType.Online && b.presence?.type !== PresenceType.Online) {
+            return -1;
+          } else if (a.presence?.type === PresenceType.Away && b.presence?.type !== PresenceType.Away) {
+            return -1;
+          } else {
+            return 1;
+          }
+        });
       }
     });
   }

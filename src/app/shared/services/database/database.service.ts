@@ -19,7 +19,8 @@ export class DatabaseService {
     return from(this.storage.defineDriver(CordovaSQLiteDriver)).pipe(
       concatMap(() => from(this.storage.create())),
       tap(() => this.storageReady.next(true)),
-      concatMap(() => this.storageReady.asObservable())
+      concatMap(() => this.storageReady.asObservable()),
+      tap(() => console.log('storage ready'))
     );
   }
 
