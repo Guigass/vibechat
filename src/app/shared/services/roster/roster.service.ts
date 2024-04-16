@@ -6,6 +6,7 @@ import { ContactGroupModel } from '../../models/contact-group.model';
 import { ContactModel } from '../../models/contact.model';
 import { PresenceModel } from '../../models/presence.model';
 import { PresenceType } from '../../enums/presence-type.enum';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,9 @@ export class RosterService {
   private xmppService = inject(XmppService);
 
   requestRoster(): Observable<void> {
-    return this.xmppService.sendStanza(xml('iq', { type: 'get' }, xml('query', { xmlns: 'jabber:iq:roster' })));
+    const id = uuidv4();
+
+    return this.xmppService.sendStanza(xml('iq', { type: 'get', id: uuidv4() }, xml('query', { xmlns: 'jabber:iq:roster' })));
   }
 
   getRosterList(): Observable<ContactGroupModel[]> {
@@ -23,10 +26,15 @@ export class RosterService {
       map(stanza => {
         const contacts = stanza.getChild('query').getChildren('item').map((item: any) => {
           const jid = item.attrs.jid;
-          const name = item.attrs.name;
+          let name = item.attrs.name;
           const subscription = item.attrs.subscription;
           const groups = item.getChildren('group').map((group: any) => group.text());
           const presence = { type: PresenceType.Offline, status: '', jid: jid } as PresenceModel;
+
+          if (!name) {
+            name = jid.split('@')[0];
+          }
+
           return { jid, name, groups, subscription, presence };
         });
 
