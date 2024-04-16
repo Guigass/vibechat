@@ -15,8 +15,6 @@ export class RosterService {
   private xmppService = inject(XmppService);
 
   requestRoster(): Observable<void> {
-    const id = uuidv4();
-
     return this.xmppService.sendStanza(xml('iq', { type: 'get', id: uuidv4() }, xml('query', { xmlns: 'jabber:iq:roster' })));
   }
 

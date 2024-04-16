@@ -8,4 +8,16 @@ export interface ContactModel {
     presence?: PresenceModel;
     hidden?: boolean;
     isTyping?: false;
+    userinfo?: VCardModel;
+}
+
+export interface VCardModel{
+    jid: string;
+    fullname: string;
+    nickname: string;
+    email: string;
+    phone: string;
+    givenName: string;
+    familyName: string;
+    avatar: string;
 }
