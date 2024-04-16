@@ -20,6 +20,7 @@ export class RosterGroupComponent implements OnChanges{
   @Input() search?: string;
 
   isSearching: boolean = false;
+  groupHidden: boolean = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if(changes['search'].firstChange === false && changes['search'].currentValue !== ''){
@@ -36,11 +37,14 @@ export class RosterGroupComponent implements OnChanges{
           contact.hidden = false;
         }
       });
+
+      this.groupHidden = this.rosterGroup?.contacts.filter(contact => contact.hidden === false).length === 0;
     } else {
       this.rosterGroup?.contacts.forEach(contact => {
         contact.hidden = false;
       });
 
+      this.groupHidden = false;
       this.open = false;
       this.isSearching = false;
     }

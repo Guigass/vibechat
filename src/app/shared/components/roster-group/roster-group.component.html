@@ -1,4 +1,4 @@
-<ion-accordion-group [value]="open ? index:''" *ngIf="rosterGroup">
+<ion-accordion-group [value]="open ? index:''" *ngIf="rosterGroup" [class.hidden]="groupHidden">
   <ion-accordion [value]="index">
     <ion-item slot="header">
       <ion-label>{{rosterGroup.name}}</ion-label>
