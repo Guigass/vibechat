@@ -24,7 +24,7 @@ export class AsideComponent {
 
   public view : string = 'usuarios';
 
-  constructor() { }
+  constructor() {}
 
   changeView(evt: any) {
     this.view = evt.detail.value;

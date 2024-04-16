@@ -32,7 +32,7 @@ export class PresenceService {
         }
 
         const status = stanza.getChild('status')?.getText();
-        if (status == 'Online') {
+        if (status?.toLowerCase() == 'online') {
           return { type: PresenceType.Online, jid: jid};
         }
 
@@ -57,7 +57,7 @@ export class PresenceService {
         }
 
         const status = stanza.getChild('status')?.getText();
-        if (status == 'Online') {
+        if (status.toLowerCase() == 'online') {
           return { type: PresenceType.Online, jid: jid};
         }
 

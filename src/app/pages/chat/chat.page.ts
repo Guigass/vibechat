@@ -70,6 +70,7 @@ export class ChatPage implements OnInit, OnDestroy {
       happyOutline,
       folderOutline,
     });
+    
     this.navCtrl.setDirection('root');
   }
 

@@ -49,18 +49,7 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
   }
 
   ngOnInit() {
-    this.contactSubscription = this.contactRepository.contactUpdate.pipe(
-      filter((contact) => contact != null && contact.jid === this.contact.jid),
-      switchMap(contact => {
-        this.contact = contact!;
-        return this.chatRepository.getLastMessage(this.contact.jid).pipe(
-          catchError(err => {
-            console.error('Erro ao obter a última mensagem:', err);
-            return of(null);
-          })
-        );
-      })
-    ).subscribe(message => {
+    this.contactSubscription = this.chatRepository.getLastMessage(this.contact.jid).subscribe(message => {
       if (message) {
         this.lastMessage = message;
       }
