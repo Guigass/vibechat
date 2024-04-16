@@ -10,7 +10,7 @@
 </ion-header>
 <ion-content class="ion-padding" *ngIf="mensages">
   <div *ngFor="let msg of mensages">
-    <app-message-bubble [message]="msg"></app-message-bubble>
+    <app-message-bubble [userId]="jid" [message]="msg"></app-message-bubble>
   </div>
 </ion-content>
 <ion-footer>

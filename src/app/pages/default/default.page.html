@@ -1,8 +1,8 @@
 <ion-header>
   <ion-toolbar>
-    <ion-buttons slot="start" (click)="goToProfile()">
+    <ion-item button slot="start" routerLinkActive="selected" [routerLink]="'/profile'">
       <app-avatar></app-avatar>
-    </ion-buttons>
+    </ion-item>
     <ion-title>Bem Vindo </ion-title>
   </ion-toolbar>
 </ion-header>

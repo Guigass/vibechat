@@ -78,7 +78,7 @@ export class ChatPage implements OnInit, OnDestroy {
     if (jidquery) {
       this.jid = jidquery;
     }
-    
+
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.contact = contact;
     });
