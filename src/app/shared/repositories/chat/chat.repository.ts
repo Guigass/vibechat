@@ -18,7 +18,6 @@ export class ChatRepository {
   private messages$: BehaviorSubject<MessageModel | null> = new BehaviorSubject<MessageModel | null>(null);
   public messages: Observable<MessageModel | null> = this.messages$.asObservable();
 
-
   constructor() { 
     this.init();
   }
@@ -37,37 +36,6 @@ export class ChatRepository {
         this.messages$.next(message);
       })
     );
-  }
-
-  private saveMessage(message: MessageModel): Observable<MessageModel> {
-    const key = this.getMessageKeyPrefix(message.from, message.to);
-    const keyDate = `${key}_d:${message.timestamp.toISOString()}`;
-
-    message.dbKey = keyDate;
-
-    return this.db.addData(keyDate, message);
-  }
-
-  private updateMessage(message: MessageModel): Observable<MessageModel> {
-    return this.db.addData(message.dbKey!, message);
-  }
-
-  private getMessageKeyPrefix(contact1: string, contact2?: string): string {
-    if (!contact2) {
-      contact2 = this.xmppService.jid;
-    }
-
-    const contacts = [contact1, contact2].sort();
-    return `m_${contacts[0]}_${contacts[1]}`;
-  }
-
-  private watchforNewMessages(): void {
-    this.chatService.onMessage().subscribe((message) => {
-      console.log('New message', message);
-      this.saveMessage(message).subscribe();
-
-      this.messages$.next(message);
-    });
   }
 
   getLastMessage(contact: string): Observable<any> {
@@ -131,5 +99,36 @@ export class ChatRepository {
 
   sendTypingState(to: string, isTyping: boolean){
     return this.chatService.setTyping(to, isTyping);
+  }
+
+  private saveMessage(message: MessageModel): Observable<MessageModel> {
+    const key = this.getMessageKeyPrefix(message.from, message.to);
+    const keyDate = `${key}_d:${message.timestamp.toISOString()}`;
+
+    message.dbKey = keyDate;
+
+    return this.db.addData(keyDate, message);
+  }
+
+  private updateMessage(message: MessageModel): Observable<MessageModel> {
+    return this.db.addData(message.dbKey!, message);
+  }
+
+  private getMessageKeyPrefix(contact1: string, contact2?: string): string {
+    if (!contact2) {
+      contact2 = this.xmppService.jid;
+    }
+
+    const contacts = [contact1, contact2].sort();
+    return `m_${contacts[0]}_${contacts[1]}`;
+  }
+
+  private watchforNewMessages(): void {
+    this.chatService.onMessage().subscribe((message) => {
+      console.log('New message', message);
+      this.saveMessage(message).subscribe();
+
+      this.messages$.next(message);
+    });
   }
 }
