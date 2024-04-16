@@ -21,7 +21,7 @@ export class AuthService {
   constructor() {}
 
   login(userCredentials: LoginModel): Observable<boolean> {
-    return this.xmppService.connect(`wss://${userCredentials.server}:7443/ws`, userCredentials.server, `${userCredentials.username}`, userCredentials.password).pipe(
+    return this.xmppService.connect(`wss://${userCredentials.server}:5443/ws`, userCredentials.server, `${userCredentials.username}`, userCredentials.password).pipe(
       switchMap(() => {
         this.webStorageService.setItem(this.preferenceKey, userCredentials, StorageType.Session, true);
 
