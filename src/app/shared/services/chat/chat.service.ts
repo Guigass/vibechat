@@ -38,10 +38,10 @@ export class ChatService {
   onMessage() {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('message')),
+      filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       filter(stanza => stanza.attrs.to.split('/')[0] === this.xmppService.jid),
       filter(stanza => stanza.getChildText('body')),
       filter(stanza => stanza.attrs.from),
-      filter(stanza => !stanza.getChild('composing', 'http://jabber.org/protocol/chatstates') && !stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')),
       map(stanza => {
         const body = stanza.getChildText('body');
         const timestamp = new Date();
