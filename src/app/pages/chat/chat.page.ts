@@ -1,5 +1,5 @@
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { Component, OnDestroy, OnInit, ViewChild, inject, viewChild, input, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject, viewChild, input, Input, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -24,8 +24,10 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subject, Subscription, debounceTime, filter, take } from 'rxjs';
+import { Subject, Subscription, debounceTime } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { ngfModule, ngf ,ngfDrop } from "angular-file"
+
 
 
 @Component({
@@ -49,23 +51,27 @@ import { PickerComponent } from '@ctrl/ngx-emoji-mart';
     IonButton,
     MessageBubbleComponent,
     AvatarComponent,
-    PickerComponent
+    PickerComponent,
+    ngfModule,
 
   ],
 
 })
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
-
   mensages!: MessageModel[];
   jid!: string;
   contact!: ContactModel | null;
+
+
+  public files: any;
   public emoji: any;
   public showPreview = false;
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
+  public fileOver:EventEmitter<any> = new EventEmitter()
 
   private typingSubject = new Subject<void>();
   private isTyping = false;
@@ -85,6 +91,8 @@ export class ChatPage implements OnInit, OnDestroy {
 
 
   ngOnInit() {
+    console.log(this.files)
+
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
       this.jid = jidquery;
@@ -145,12 +153,16 @@ export class ChatPage implements OnInit, OnDestroy {
 
   addEmoji(evnt: any) {
     this.txtaMsg.value += evnt.emoji.native;
+
   }
 
   openEmoji() {
-    this.showPreview = true
+    this.showPreview = this.showPreview ? false : true;
   }
 
+  getDate(){
+
+  }
 
 }
 
