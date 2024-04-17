@@ -15,13 +15,17 @@
 </ion-content>
 <ion-footer>
   <ion-item class="container">
-    <ion-item button>
+    <ion-item button (ionClick)="openEmoji()">
       <ion-icon name="happy-outline"></ion-icon>
     </ion-item>
-    <ion-item button>
+    <ion-item button><ion-icon name="image-outline"></ion-icon>
       <ion-icon name="folder-outline"></ion-icon>
     </ion-item>
-    <ion-textarea (ionInput)="typing($event)" [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem" #txtaMsg></ion-textarea>
-    <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon></ion-item>
+    <ion-textarea (ionInput)="typing($event)" [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem"
+      #txtaMsg></ion-textarea>
+    <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon>
+    </ion-item>
   </ion-item>
+    <emoji-mart [style]="{ position: 'absolute', bottom: '60px', left: '0px' }" (emojiClick)="addEmoji($event)"
+      [i18n]="{ search: 'Recherche', categories: { search: 'Recentes', recent: 'Recentes' } }"></emoji-mart>
 </ion-footer>

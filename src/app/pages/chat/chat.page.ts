@@ -1,5 +1,5 @@
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject, viewChild, input, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -25,6 +25,8 @@ import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
 import { Subject, Subscription, debounceTime, filter, take } from 'rxjs';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+
 
 @Component({
   selector: 'app-chat',
@@ -46,14 +48,20 @@ import { Subject, Subscription, debounceTime, filter, take } from 'rxjs';
     IonMenuButton,
     IonButton,
     MessageBubbleComponent,
-    AvatarComponent
+    AvatarComponent,
+    PickerComponent
+
   ],
+
 })
 export class ChatPage implements OnInit, OnDestroy {
+  @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
+
   mensages!: MessageModel[];
   jid!: string;
   contact!: ContactModel | null;
-
+  public emoji: any;
+  public showPreview = false;
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
@@ -70,9 +78,11 @@ export class ChatPage implements OnInit, OnDestroy {
       happyOutline,
       folderOutline,
     });
-    
+
     this.navCtrl.setDirection('root');
   }
+
+
 
   ngOnInit() {
     const jidquery = this.route.snapshot.paramMap.get('jid');
@@ -129,4 +139,18 @@ export class ChatPage implements OnInit, OnDestroy {
     this.typingSubject.complete();
     this.messagesSubscription?.unsubscribe();
   }
+
+  addEmoji(evnt: any) {
+    this.txtaMsg.value += evnt.emoji.native;
+  }
+
+  openEmoji() {
+    this.showPreview = true
+  }
+
+
 }
+
+
+
+
