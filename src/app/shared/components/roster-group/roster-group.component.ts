@@ -64,22 +64,30 @@ export class RosterGroupComponent implements OnInit, OnChanges {
   }
 
   sortContacts() {
-    const sortedContacts = this.rosterGroup!.contacts.sort((a, b) => {
-      const aPresence = this.contactPresences.get(a.jid)?.type || 'offline';
-      const bPresence = this.contactPresences.get(b.jid)?.type || 'offline';
-      return this.getPresenceWeight(aPresence) - this.getPresenceWeight(bPresence);
+    const sortedContacts = this.rosterGroup!.contacts.slice().sort((a, b) => {
+
+        const aPresence = this.contactPresences.get(a.jid)?.type || PresenceType.Offline;
+        const bPresence = this.contactPresences.get(b.jid)?.type || PresenceType.Offline;
+        
+        const presenceComparison = this.getPresenceWeight(aPresence) - this.getPresenceWeight(bPresence);
+        if (presenceComparison !== 0) {
+            return presenceComparison;
+        }
+        
+        return a.jid.localeCompare(b.jid);
     });
 
     this.rosterGroup!.contacts = sortedContacts;
-  }
-  
-  getPresenceWeight(presenceType: string): number {
+}
+
+getPresenceWeight(presenceType: string): number {
     switch (presenceType) {
-      case 'online': return 1;
-      case 'away': return 2;
-      default: return 3;  // 'offline'
+        case PresenceType.Online: return 1;
+        case PresenceType.Away: return 2;
+        case PresenceType.DND: return 3;
+        default: return 4;
     }
-  }
+}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['search']) {
