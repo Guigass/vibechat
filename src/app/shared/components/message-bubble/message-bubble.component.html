@@ -1,32 +1,8 @@
 
   <div id="chat-container">
-      <!-- <app-avatar></app-avatar>
-    <div class="bubble *ngIf='!message.from'">
-      <strong>{{ message.from }}</strong>
-        <p>{{ message.body }}</p>
-
-    </div>
-    <div class="bubble right" *ngIf="message.to">
-      <app-avatar></app-avatar>
-       <strong>{{message.to}}</strong>
-        <p>{{message.body}}</p>
-    </div> -->
-
-    <!-- ### Utilizer essa ####  -->
-    <div class="content" [ngClass]="message.from">
+    <div class="content" *ngIf="user?.jid === message.from">
       <app-avatar></app-avatar>
       <div class="bubble">
-        <strong>
-          {{message.from}}
-        </strong>
-        <p>
-          {{message.body}}
-        </p>
-      </div>
-    </div>
-    <div class="content right" [ngClass]="message.to" >
-      <app-avatar></app-avatar>
-      <div class="bubble right">
         <strong>
           {{message.to}}
         </strong>
@@ -35,6 +11,16 @@
         </p>
       </div>
     </div>
+    <div class="content right"  >
+      <app-avatar></app-avatar>
+      <div class="bubble right">
+        <strong>
+          {{message.from}}
+        </strong>
+        <p>
+          {{message.body}}
+        </p>
+      </div>
+    </div>
   </div>
-  <!-- ################### -->
 

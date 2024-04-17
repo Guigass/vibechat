@@ -17,15 +17,14 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
 export class MessageBubbleComponent implements OnInit {
   private contactRepository = inject(ContactRepository);
   @Input() message!: MessageModel;
-  @Input() userId!:string;
-  public contact!:ContactModel | null;
+  @Input() user!:ContactModel | null;
 
   constructor() { }
 
   ngOnInit(): void {
-    this.contactRepository.getContact(this.userId).subscribe((contact) => {
-      this.contact = contact;
-    });
+    console.log(this.message)
+
+      console.log(this.user)
   };
 
 }

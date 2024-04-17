@@ -1,33 +1,30 @@
-
 #chat-container {
   display: flex;
   flex-direction: column;
   padding: 1rem;
 }
 
-.content{
+.content {
   display: flex;
-  gap:20px;
+  gap: 20px;
   align-items: center;
-  p{
+  p {
     padding: 0;
     margin: 0;
   }
 }
-.content.right{
+.content.right {
   display: flex;
-  gap:20px;
+  gap: 20px;
   align-items: center;
   flex-direction: row-reverse;
-  p{
+  p {
     padding: 0;
     margin: 0;
   }
 }
 
-
-
-app-avatar{
+app-avatar {
   margin-bottom: 5px;
 }
 .bubble {
@@ -37,12 +34,9 @@ app-avatar{
   margin-bottom: 0.25rem;
   max-width: 40%;
   align-self: flex-start;
-  --inner-border-width: 0;
   border-radius: 0.75rem;
   padding: 0.5rem 0.7rem;
   position: relative;
-  --background:transparent;
-
 }
 
 .bubble::after {
@@ -60,24 +54,13 @@ app-avatar{
   margin-left: -12px;
 }
 
-.bubble.right {
-  // border-color: #AAD;
-  // background: #EEF;
-  align-self: flex-end;
-}
-
 .bubble.right::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    width: 0;
-    height: 0;
-    border: 12px solid transparent;
+  content: "";
+  right: 0;
+  border: 12px solid transparent;
   border-left-color: white;
   border-right: 0;
-    border-top: 0;
-  margin-top: -6px;
+  border-top: 0;
   margin-right: -12px;
   left: initial;
 }
