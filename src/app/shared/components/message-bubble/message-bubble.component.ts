@@ -22,6 +22,9 @@ export class MessageBubbleComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+    console.log(this.message)
+
+      console.log(this.user)
     this.contactRepository.getContact(this.userId).subscribe((contact) => {
       this.contact = contact;
     });

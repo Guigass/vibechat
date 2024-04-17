@@ -1,3 +1,4 @@
 <ion-avatar *ngIf="presence" [ngStyle]="{ 'outline-color': presence.type | avatarColor }">
-  <ion-img src="/assets/images/user-ph.png"></ion-img>
+  <ion-img *ngIf="!contactInfo || !contactInfo.avatar" src="/assets/images/user-ph.png"></ion-img>
+  <ion-img *ngIf="contactInfo && contactInfo.avatar" [src]="'data:image/jpg;base64,' + contactInfo.avatar"></ion-img>
 </ion-avatar>

@@ -28,6 +28,10 @@ export class ContactRepository {
     return this.db.contacts.$.where('jid').equals(jid).first();
   }
 
+  public getContactInfo(jid: string): Observable<any> {
+    return this.db.contactsInfo.$.where('jid').equals(jid).first();
+  }
+
   public getContactPresence(jid: string): Observable<any> {
     return this.db.dbReady.pipe(
       filter(ready => ready),
@@ -44,26 +48,42 @@ export class ContactRepository {
 
   private updateUsersInfo() {
     this.ngZone.runOutsideAngular(() => {
+      const umaSemanaAtras = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
+  
       this.rosterRepository.rosterList.pipe(
         take(1),
-        concatMap(contacts => from(contacts)),  // Converte a lista de contatos em um observable que emite cada contato
-        concatMap(contact => 
-          this.vcardService.getVCard(contact.jid).pipe(
-            delay(1000),  // Adiciona um delay de 1000ms entre cada chamada
-            map(vcard => ({ contact, vcard }))  // Mapeia o vcard para incluir o contato original
+        concatMap(contacts => from(contacts)),
+        concatMap(contact =>
+          from(this.db.contactsInfo.where('jid').equals(contact.jid).first()).pipe(
+            catchError(error => {
+              return of(null);
+            }),
+            concatMap(contactInfo => {
+              if (!contactInfo || !contactInfo.updatedAt || new Date(contactInfo.updatedAt) < umaSemanaAtras) {
+                return this.vcardService.getVCard(contact.jid).pipe(
+                  delay(1000),
+                  map(vcard => ({ contact, vcard, contactInfo })),
+                  catchError(error => {
+                    return of();
+                  })
+                );
+              } else {
+                return of();
+              }
+            }),
+            filter(result => result !== undefined)
           )
         ),
-        concatMap(({ contact, vcard }) =>  // Processa cada vcard após o delay
-          this.db.contactsInfo.$.where('jid').equals(contact.jid).first().pipe(
-            concatMap(contactInfo =>
-              contactInfo ? this.db.contactsInfo.update(contactInfo.id!, { ...vcard }) : this.db.contactsInfo.add(vcard)
-            )
-          )
-        )
-      ).subscribe({
-        complete: () => console.log('Update complete'),
-        error: (error) => console.log('Error in the update chain:', error)
-      });
+        filter(result => result !== undefined),
+        concatMap(({ contact, vcard, contactInfo }) =>
+          contactInfo ? 
+            from(this.db.contactsInfo.update(contactInfo.id!, { ...vcard, updatedAt: new Date() })) :
+            from(this.db.contactsInfo.add({ ...vcard, jid: contact.jid, updatedAt: new Date() }))
+        ),
+        catchError(error => {
+          return of(null);
+        })
+      ).subscribe();
     });
   }
 
