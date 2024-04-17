@@ -17,7 +17,9 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
 export class MessageBubbleComponent implements OnInit {
   private contactRepository = inject(ContactRepository);
   @Input() message!: MessageModel;
-  @Input() user!:ContactModel | null;
+  @Input() user!:ContactModel | null | undefined;
+
+  public contact: any;
 
   constructor() { }
 
@@ -25,7 +27,7 @@ export class MessageBubbleComponent implements OnInit {
     console.log(this.message)
 
       console.log(this.user)
-    this.contactRepository.getContact(this.userId).subscribe((contact) => {
+    this.contactRepository.getContact(this.user?.jid ?? '').subscribe((contact) => {
       this.contact = contact;
     });
   };
