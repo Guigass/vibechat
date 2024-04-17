@@ -17,6 +17,13 @@ import { AvatarColorPipe } from 'src/app/shared/pipes/avatar-color/avatar-color.
     AvatarColorPipe
   ]
 })
-export class AvatarComponent {
-  @Input() user: ContactModel | null | undefined;
+export class AvatarComponent implements OnInit {
+  @Input() user?: ContactModel | null
+
+
+  ngOnInit(): void {
+
+
+  }
+
 }
