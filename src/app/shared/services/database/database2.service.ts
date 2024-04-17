@@ -30,7 +30,7 @@ export class Database2Service extends Dexie {
     this.version(1).stores({
       contacts: '++id, jid, $name, $groups, $subscription, $presence, $hidden, $isTyping, $userinfo',
       presences: '++id, jid, $type, $status',
-      contactsInfo: '++id, jid, $fullname, $nickname, $email, $phone, $givenName, $familyName, $avatar'
+      contactsInfo: '++id, jid, $fullname, $nickname, $email, $phone, $givenName, $familyName, avatar'
     });
 
     this.open().then(() => {
