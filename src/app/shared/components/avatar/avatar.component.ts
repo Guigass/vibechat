@@ -7,6 +7,7 @@ import { AvatarColorPipe } from 'src/app/shared/pipes/avatar-color/avatar-color.
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { Subscription, filter, tap } from 'rxjs';
 import { PresenceModel } from '../../models/presence.model';
+import { VCardModel } from '../../models/vcard.model';
 
 @Component({
   selector: 'app-avatar',
@@ -24,10 +25,12 @@ export class AvatarComponent implements AfterViewInit, OnDestroy {
   private contactRepository = inject(ContactRepository);
 
   private persenceSubscription!: Subscription;
+  private contactInfoSubscription!: Subscription;
 
   @Input() user: ContactModel | null | undefined;
 
   presence!: PresenceModel;
+  contactInfo!: VCardModel;
 
   ngAfterViewInit(): void {
     if (!this.user) {
@@ -40,9 +43,17 @@ export class AvatarComponent implements AfterViewInit, OnDestroy {
     ).subscribe((presence) => {
       this.presence = presence;
     });
+
+    this.contactInfoSubscription = this.contactRepository.getContactInfo(this.user?.jid!).pipe(
+      filter(contactInfo => contactInfo),
+      filter(contactInfo => contactInfo !== null && this.user !== null && contactInfo.jid === this.user?.jid)
+    ).subscribe((contactInfo) => {
+      this.contactInfo = contactInfo;
+    });
   }
 
   ngOnDestroy(): void {
     this.persenceSubscription?.unsubscribe();
+    this.contactInfoSubscription?.unsubscribe();
   }
 }
