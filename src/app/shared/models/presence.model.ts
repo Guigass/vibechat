@@ -5,4 +5,5 @@ export interface PresenceModel {
     jid: string;
     type: PresenceType;
     status?: string;
+    show?: string;
 }

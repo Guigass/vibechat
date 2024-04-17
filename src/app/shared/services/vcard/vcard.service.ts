@@ -13,6 +13,12 @@ export class VcardService {
 
   constructor() { }
 
+  public onVcardUpdate() {
+    return this.xmppService.onStanza$.pipe(
+      filter(stanza => stanza.is('presence') && stanza.getChild('x').attrs.xmlns === 'vcard-temp:x:update')
+    )
+  }
+
   public requestVCard(jid: string): Observable<void> {
     return this.xmppService.sendStanza(xml('iq', { type: 'get', id: uuidv4(), to: jid }, xml('vCard', { xmlns: 'vcard-temp' })));
   }

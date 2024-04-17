@@ -53,7 +53,6 @@ import { ngfModule, ngf ,ngfDrop } from "angular-file"
     AvatarComponent,
     PickerComponent,
     ngfModule,
-
   ],
 
 })
@@ -99,7 +98,7 @@ export class ChatPage implements OnInit, OnDestroy {
     }
 
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
-      this.contact = contact;
+      this.contact = contact!;
     });
 
     this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {

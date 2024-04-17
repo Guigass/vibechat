@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { ContactModel } from '../../models/contact.model';
 import { IonAvatar } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
@@ -22,6 +22,7 @@ import { VCardModel } from '../../models/vcard.model';
   ]
 })
 export class AvatarComponent implements AfterViewInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
   private contactRepository = inject(ContactRepository);
 
   private persenceSubscription!: Subscription;
@@ -37,18 +38,20 @@ export class AvatarComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
-    this.persenceSubscription = this.contactRepository.getContactPresence(this.user?.jid!).pipe(
-      filter(presence => presence),
-      filter(presence => presence !== null && this.user !== null && presence.jid === this.user?.jid)
+    this.persenceSubscription = this.contactRepository.getContactPresenceChanges(this.user?.jid!).pipe(
+      filter(presence => presence !== undefined),
+      filter(presence => presence !== null && this.user !== null && presence!.jid === this.user?.jid)
     ).subscribe((presence) => {
-      this.presence = presence;
+      this.presence = presence!;
+      this.cdr.markForCheck();
     });
 
-    this.contactInfoSubscription = this.contactRepository.getContactInfo(this.user?.jid!).pipe(
-      filter(contactInfo => contactInfo),
-      filter(contactInfo => contactInfo !== null && this.user !== null && contactInfo.jid === this.user?.jid)
+    this.contactInfoSubscription = this.contactRepository.getContactInfoChanges(this.user?.jid!).pipe(
+      filter(contactInfo => contactInfo !== undefined),
+      filter(contactInfo => contactInfo !== null && this.user !== null && contactInfo!.jid === this.user?.jid)
     ).subscribe((contactInfo) => {
-      this.contactInfo = contactInfo;
+      this.contactInfo = contactInfo!;
+      this.cdr.markForCheck();
     });
   }
 

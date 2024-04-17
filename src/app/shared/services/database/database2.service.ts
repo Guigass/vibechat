@@ -28,7 +28,7 @@ export class Database2Service extends Dexie {
     dexieRxjs(this);
 
     this.version(1).stores({
-      contacts: '++id, jid, $name, $groups, $subscription, $presence, $hidden, $isTyping, $userinfo',
+      contacts: '++id, jid, $name, $groups, $subscription',
       presences: '++id, jid, $type, $status',
       contactsInfo: '++id, jid, $fullname, $nickname, $email, $phone, $givenName, $familyName, avatar'
     });

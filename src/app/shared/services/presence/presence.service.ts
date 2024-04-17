@@ -46,29 +46,4 @@ export class PresenceService {
       })
     );
   }
-
-  getPresenceFromUser(jid: string): Observable<PresenceModel> {
-    return this.xmppService.onStanza$.pipe(
-      filter(stanza => stanza.is('presence')),
-      filter(stanza => stanza.attrs.from.split('/')[0] === jid),
-      map(stanza => {
-        const type = stanza.attrs.type;
-        if (type ===  'unavailable') {
-          return { type: PresenceType.Offline, jid: jid};
-        }
-
-        const status = stanza.getChild('status')?.getText();
-        if (status.toLowerCase() == 'online') {
-          return { type: PresenceType.Online, jid: jid};
-        }
-
-        const presenceType = stanza.getChild('show');
-        if (presenceType) {
-          return { type: presenceType.getText() as PresenceType, jid: jid, status: status };
-        } else {
-          return { type: PresenceType.Offline, jid: jid, status: status };
-        }
-      })
-    );
-  }
 }
