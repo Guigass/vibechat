@@ -102,17 +102,20 @@ export class ChatPage implements OnInit, OnDestroy {
       this.isTyping = false;
     });
 
-    this.messagesSubscription = this.chatRepository.messages.pipe(
-      filter((message) => message != null),
-      filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
-    ).subscribe((message) => {
-      this.mensages.push(message!);
-    });
+    // this.messagesSubscription = this.chatRepository.messages.pipe(
+    //   filter((message) => message != null),
+    //   filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
+    // ).subscribe((message) => {
+    //   console.log('message', message);
+    //   this.mensages.push(message!);
+    // });
 
-    this.chatRepository.getSetMessagesAsRead(this.jid).pipe(take(1))
-    .subscribe((messages) => {
-      this.mensages = messages;
-    });
+    // this.chatRepository.getSetMessagesAsRead(this.jid).pipe(take(1))
+    // .subscribe((messages) => {
+    //   this.mensages = messages;
+    // });
+
+    // this.chatRepository.requestMessagesHistory(this.jid, 10, '');
   }
 
   sendMessage(msg: any) {

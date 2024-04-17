@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  storageEncryptionKey: '1234'
+  storageEncryptionKey: 'rdESxop495q38OfAI49MdXPjAEbcR+UHbZGXsaXk5YU='
 };
 
 /*

@@ -42,6 +42,7 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
   private contactSubscription!: Subscription;
   private messagesSubscription!: Subscription;
 
+
   unreadMessages = 0;
   lastMessage!: MessageModel | null;
 
@@ -49,20 +50,11 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
   }
 
   ngOnInit() {
-    this.contactSubscription = this.chatRepository.getLastMessage(this.contact.jid).subscribe(message => {
-      if (message) {
-        this.lastMessage = message;
-      }
-    });
+
   }
 
   ngAfterViewInit(): void {
-    this.messagesSubscription = this.chatRepository.messages.pipe(
-      filter((message) => message != null),
-      filter((message) => message?.from === this.contact.jid || message?.to === this.contact.jid)
-    ).subscribe((message) => {
-      this.lastMessage = message;
-    });
+
   }
 
   ngOnDestroy(): void {

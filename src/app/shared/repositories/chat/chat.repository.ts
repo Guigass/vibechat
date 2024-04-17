@@ -2,7 +2,7 @@ import { ContactRepository } from './../contact/contact.repository';
 import { Injectable, inject } from '@angular/core';
 import { ChatService } from '../../services/chat/chat.service';
 import { DatabaseService } from '../../services/database/database.service';
-import { BehaviorSubject, Observable, Subject, of, switchMap, tap } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, of, switchMap, take, tap } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
 import { MessageModel } from '../../models/message.model';
 
@@ -23,8 +23,9 @@ export class ChatRepository {
   }
 
   private init(): void {
-    this.watchforNewMessages();
-    this.watchUserTypingState();
+    // this.watchforNewMessages();
+    // this.watchUserTypingState();
+    // this.watchMessagesFromServer();
   }
 
   sendMessage(body: string, to: string): Observable<MessageModel> {
@@ -87,18 +88,22 @@ export class ChatRepository {
   };
 
   watchUserTypingState(){
-    this.chatService.isTyping().subscribe((typing) => {
-      this.contactRepository.getContact(typing.jid).subscribe((contact) => {
-        if(contact){
-          contact.isTyping = typing.isTyping;
-          this.contactRepository.updateContact(contact).subscribe();
-        }
-      });
-    });
+    // this.chatService.isTyping().subscribe((typing) => {
+    //   this.contactRepository.getContact(typing.jid).subscribe((contact) => {
+    //     if(contact){
+    //       contact.isTyping = typing.isTyping;
+    //       this.contactRepository.updateContact(contact).subscribe();
+    //     }
+    //   });
+    // });
   }
 
   sendTypingState(to: string, isTyping: boolean){
     return this.chatService.setTyping(to, isTyping);
+  }
+
+  requestMessagesHistory(contact: string, limit: number, before: string): void {
+    this.chatService.requestMessagesHistory(contact, limit, before).subscribe();
   }
 
   private saveMessage(message: MessageModel): Observable<MessageModel> {
@@ -107,7 +112,15 @@ export class ChatRepository {
 
     message.dbKey = keyDate;
 
-    return this.db.addData(keyDate, message);
+    return this.db.getData(keyDate).pipe(
+      switchMap((data) => {
+        if (data){
+          return of(data)
+        } else {
+          return this.db.addData(keyDate, message);
+        }
+      })
+    )
   }
 
   private updateMessage(message: MessageModel): Observable<MessageModel> {
@@ -125,10 +138,15 @@ export class ChatRepository {
 
   private watchforNewMessages(): void {
     this.chatService.onMessage().subscribe((message) => {
-      console.log('New message', message);
       this.saveMessage(message).subscribe();
 
       this.messages$.next(message);
+    });
+  }
+
+  private watchMessagesFromServer(): void {
+    this.chatService.getMessagesHistory().subscribe((message) => {
+      this.saveMessage(message).subscribe();
     });
   }
 }

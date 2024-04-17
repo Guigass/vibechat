@@ -147,27 +147,23 @@ export class ChatService {
     return this.xmppService.sendStanza(mamQuery);
   }
 
-  getMessagesHistory(from: string): Observable<MessageModel> {
+  getMessagesHistory(): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
-      // Filtra para processar apenas mensagens relevantes
       filter(stanza =>
-        stanza.is('message') &&
-        (
-          stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.from.split('/')[0] === from ||
-          stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client').attrs.to.split('/')[0] === from
-        ) &&
         stanza.getChild('result', 'urn:xmpp:mam:2') != null
       ),
       map(stanza => {
         const result = stanza.getChild('result', 'urn:xmpp:mam:2');
         const forwarded = result.getChild('forwarded', 'urn:xmpp:forward:0');
         const message = forwarded.getChild('message', 'jabber:client');
+        const from = message.attrs.from.split('/')[0];
         const delay = forwarded.getChild('delay', 'urn:xmpp:delay');
         const timestamp = new Date(delay.attrs.stamp);
         const body = message.getChildText('body');
         const messageId = message.attrs.id;
 
-        const type = message.attrs.from.includes(from) ? 'received' : 'sent';
+
+        const type = message.attrs.from.includes(this.xmppService.jid) ? 'received' : 'sent';
 
         return new MessageModel(from, message.attrs.to, body, timestamp, messageId, type);
       })

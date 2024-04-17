@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-item>
-      <app-avatar [user]="contact"></app-avatar>
+      <app-avatar *ngIf="contact" [user]="contact"></app-avatar>
       <ion-title>
         {{contact?.name}}
       </ion-title>

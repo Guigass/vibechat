@@ -1,6 +1,8 @@
 import { PresenceModel } from "./presence.model";
+import { VCardModel } from "./vcard.model";
 
 export interface ContactModel {
+    id?: number;
     jid: string;
     name: string;
     groups: string[];
@@ -9,15 +11,4 @@ export interface ContactModel {
     hidden?: boolean;
     isTyping?: false;
     userinfo?: VCardModel;
-}
-
-export interface VCardModel{
-    jid: string;
-    fullname: string;
-    nickname: string;
-    email: string;
-    phone: string;
-    givenName: string;
-    familyName: string;
-    avatar: string;
 }

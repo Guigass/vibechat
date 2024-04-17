@@ -24,6 +24,7 @@ export class PresenceService {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('presence')),
       filter(stanza => stanza.attrs.from),
+      filter(stanza => stanza.attrs.from.split('/')[0] !== this.xmppService.jid),
       map(stanza => {
         const jid = stanza.attrs.from.split('/')[0];
         const type = stanza.attrs.type;
