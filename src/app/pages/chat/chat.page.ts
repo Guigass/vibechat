@@ -155,6 +155,12 @@ export class ChatPage implements OnInit, OnDestroy {
     this.txtaMsg.value += evnt.emoji.native;
 
   }
+  sendFile(evnt: any) {
+    setTimeout(() => {
+      console.log(this.files.name)
+      this.txtaMsg.value += this.files.name;
+  }, 1000);
+  }
 
   openEmoji() {
     this.showPreview = this.showPreview ? false : true;
