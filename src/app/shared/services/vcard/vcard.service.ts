@@ -29,7 +29,8 @@ export class VcardService {
           phone: stanza.getChild('vCard').getChild('TEL').getChild('NUMBER').text(),
           givenName: stanza.getChild('vCard').getChild('N').getChild('GIVEN').text(),
           familyName: stanza.getChild('vCard').getChild('N').getChild('FAMILY').text(),
-          avatar: stanza.getChild('vCard').getChild('PHOTO').getChild('BINVAL').text()
+          avatar: stanza.getChild('vCard').getChild('PHOTO').getChild('BINVAL').text(),
+          updatedAt: new Date()
         };
       })
     );
@@ -40,13 +41,14 @@ export class VcardService {
       map((stanza:any) => {
         return {
           jid: jid,
-          fullname: stanza.getChild('vCard').getChild('FN').text(),
-          nickname: stanza.getChild('vCard').getChild('NICKNAME').text(),
-          email: stanza.getChild('vCard').getChild('EMAIL').getChild('USERID').text(),
-          phone: stanza.getChild('vCard').getChild('TEL').getChild('NUMBER').text(),
-          givenName: stanza.getChild('vCard').getChild('N').getChild('GIVEN').text(),
-          familyName: stanza.getChild('vCard').getChild('N').getChild('FAMILY').text(),
-          avatar: stanza.getChild('vCard').getChild('PHOTO').getChild('BINVAL').text()
+          fullname: stanza.getChild('vCard')?.getChild('FN')?.text(),
+          nickname: stanza.getChild('vCard')?.getChild('NICKNAME')?.text(),
+          email: stanza.getChild('vCard')?.getChild('EMAIL')?.getChild('USERID')?.text(),
+          phone: stanza.getChild('vCard')?.getChild('TEL')?.getChild('NUMBER')?.text(),
+          givenName: stanza.getChild('vCard')?.getChild('N')?.getChild('GIVEN')?.text(),
+          familyName: stanza.getChild('vCard')?.getChild('N')?.getChild('FAMILY')?.text(),
+          avatar: stanza.getChild('vCard')?.getChild('PHOTO')?.getChild('BINVAL')?.text(),
+          updatedAt: new Date()
         };
       })
     );

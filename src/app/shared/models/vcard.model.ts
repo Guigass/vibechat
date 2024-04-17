@@ -8,4 +8,5 @@ export interface VCardModel{
     givenName: string;
     familyName: string;
     avatar: string;
+    updatedAt?: Date;
 }

@@ -1,10 +1,10 @@
 import { RosterRepository } from 'src/app/shared/repositories/roster/roster.repository';
-import { Component, OnInit, inject, input } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
 import { IonContent, IonSearchbar, IonList } from "@ionic/angular/standalone";
-import { map, take } from 'rxjs';
+import { Subscription, map, take } from 'rxjs';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { SortPipe } from '../../pipes/sort/sort.pipe';
 import { ContactGroupModel } from '../../models/contact-group.model';
@@ -22,16 +22,20 @@ import { ContactGroupModel } from '../../models/contact-group.model';
     SortPipe
   ],
 })
-export class RosterComponent {
+export class RosterComponent implements OnInit, OnDestroy {
   public rosterRepository = inject(RosterRepository);
   public contactResposioty = inject(ContactRepository);
+
+  rosterSubscription!: Subscription;
 
   rosterList: ContactGroupModel[] = [];
 
   searchText: string = '';
 
-  constructor() {
-    this.rosterRepository.rosterList.pipe(
+  constructor() { }
+
+  ngOnInit(): void {
+    this.rosterSubscription = this.rosterRepository.rosterList.pipe(
       map((contacts) => {
         const groupsMap = new Map<string, ContactGroupModel>();
 
@@ -53,12 +57,19 @@ export class RosterComponent {
       })
     )
     .subscribe((roster) => {
-      console.log(roster);
       this.rosterList = roster;
     });
   }
 
+  ngOnDestroy(): void {
+    this.rosterSubscription?.unsubscribe();
+  }
+
   search(evt: any){
     this.searchText = evt.detail.value;
+  }
+
+  trackBy(index: number, item: ContactGroupModel) {
+    return item.name;
   }
 }

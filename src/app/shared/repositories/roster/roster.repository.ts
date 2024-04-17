@@ -1,5 +1,5 @@
 import { Injectable, NgZone, inject } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, mergeMap, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, filter, mergeMap, share, take } from 'rxjs';
 import { RosterService } from '../../services/roster/roster.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { ContactGroupModel } from '../../models/contact-group.model';
@@ -18,10 +18,13 @@ export class RosterRepository {
   private ngZone = inject(NgZone);
 
   private rosterList$: ReplaySubject<ContactModel[]> = new ReplaySubject<ContactModel[]>();
-  public rosterList = this.rosterList$.asObservable();
+  public rosterList = this.rosterList$.asObservable().pipe(share());
 
   constructor() {
-    this.init();
+    this.db.dbReady.pipe(filter(ready => ready)).subscribe(() => {
+      this.init();
+    });
+    
   }
 
   private init() {

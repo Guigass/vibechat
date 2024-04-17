@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { SplashScreenService } from './../../services/splash-screen/splash-screen.service';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-splash-screen',
@@ -9,13 +10,20 @@ import { Component, OnInit, inject } from '@angular/core';
   standalone: true,
   imports: [CommonModule]
 })
-export class SplashScreenComponent {
+export class SplashScreenComponent implements OnDestroy {
   public showSplash = true;
   private splashScreenService = inject(SplashScreenService);
+
+  splashSubscription: Subscription;
+
   constructor() { 
-    this.splashScreenService.onChanges.subscribe((show: boolean) => {
+    this.splashSubscription = this.splashScreenService.onChanges.subscribe((show: boolean) => {
       this.showSplash = show;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.splashSubscription.unsubscribe();
   }
 
 }

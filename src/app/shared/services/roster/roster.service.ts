@@ -1,13 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { xml } from '@xmpp/client';
-import { Observable, filter, map, Subscription } from 'rxjs';
-import { ContactGroupModel } from '../../models/contact-group.model';
+import { Observable, filter, map } from 'rxjs';
 import { ContactModel } from '../../models/contact.model';
-import { PresenceModel } from '../../models/presence.model';
-import { PresenceType } from '../../enums/presence-type.enum';
 import { v4 as uuidv4 } from 'uuid';
-import { Database2Service } from '../database/database2.service';
 
 @Injectable({
   providedIn: 'root'

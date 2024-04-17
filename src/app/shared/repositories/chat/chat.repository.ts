@@ -88,14 +88,14 @@ export class ChatRepository {
   };
 
   watchUserTypingState(){
-    this.chatService.isTyping().subscribe((typing) => {
-      this.contactRepository.getContact(typing.jid).subscribe((contact) => {
-        if(contact){
-          contact.isTyping = typing.isTyping;
-          this.contactRepository.updateContact(contact).subscribe();
-        }
-      });
-    });
+    // this.chatService.isTyping().subscribe((typing) => {
+    //   this.contactRepository.getContact(typing.jid).subscribe((contact) => {
+    //     if(contact){
+    //       contact.isTyping = typing.isTyping;
+    //       this.contactRepository.updateContact(contact).subscribe();
+    //     }
+    //   });
+    // });
   }
 
   sendTypingState(to: string, isTyping: boolean){
