@@ -53,7 +53,6 @@ import { ngfModule, ngf ,ngfDrop } from "angular-file"
     AvatarComponent,
     PickerComponent,
     ngfModule,
-
   ],
 
 })
@@ -98,16 +97,18 @@ export class ChatPage implements OnInit, OnDestroy {
     }
 
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
-      this.contact = contact;
+      this.contact = contact!;
     });
 
     this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
       if (this.isTyping && this.contact) {
-        this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
+        //this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
       }
 
       this.isTyping = false;
     });
+
+    this.chatRepository.loadMessagesFromServer(this.jid, 10);
 
     // this.messagesSubscription = this.chatRepository.messages.pipe(
     //   filter((message) => message != null),
@@ -130,15 +131,15 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
-      msg.value = '';
-      msg.setFocus();
-    });
+    //this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
+    //  msg.value = '';
+    //  msg.setFocus();
+    //});
   }
 
   typing(event: any) {
     if (!this.isTyping && this.contact) {
-      this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
+      //this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
     }
 
     this.isTyping = true;

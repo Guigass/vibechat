@@ -1,22 +1,23 @@
+import { PresenceService } from 'src/app/shared/services/presence/presence.service';
 import { ContactRepository } from './../../repositories/contact/contact.repository';
-import { Component, Input, OnChanges, OnInit, SimpleChanges, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { ContactGroupModel } from '../../models/contact-group.model';
 import { RosterContactItemComponent } from '../../components/roster-contact-item/roster-contact-item.component';
 import { IonAccordionGroup, IonAccordion, IonLabel, IonItem, IonList } from "@ionic/angular/standalone";
-import { SortOnlinePipe } from '../../pipes/sort-online/sort-online.pipe';
-import { filter } from 'rxjs';
-import { PresenceModel } from '../../models/presence.model';
-import { PresenceType } from '../../enums/presence-type.enum';
 import { ContactModel } from '../../models/contact.model';
+import { BehaviorSubject, map, distinctUntilChanged, from, switchMap, catchError, of, tap, concatMap, filter } from 'rxjs';
+import { PresenceType } from '../../enums/presence-type.enum';
+import { PresenceModel } from '../../models/presence.model';
 
 @Component({
   selector: 'app-roster-group',
   templateUrl: './roster-group.component.html',
   styleUrls: ['./roster-group.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent, SortOnlinePipe],
+  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent],
 })
 export class RosterGroupComponent implements OnInit, OnChanges {
   @Input() rosterGroup?: ContactGroupModel;
@@ -25,34 +26,68 @@ export class RosterGroupComponent implements OnInit, OnChanges {
   @Input() search?: string;
 
   private contactRepository = inject(ContactRepository);
+  private presenceService = inject(PresenceService);
+
+  private contactPresences: Map<string, PresenceModel | undefined> = new Map();
 
   isSearching: boolean = false;
   groupHidden: boolean = false;
 
 
   ngOnInit(): void {
-    // this.contactRepository.presenceUpdate.pipe(
-    //   filter(presence => this.rosterGroup?.contacts.findIndex(contact => contact.jid === presence!.jid) !== -1)
-    // ).subscribe(presence => {
-    //   if (presence) {
-    //     const index = this.rosterGroup?.contacts.findIndex(contact => contact.jid === presence.jid);
-    //     if (index !== -1) {
-    //       this.rosterGroup!.contacts[index!].presence = presence;
-    //     }
-
-    //     //Order a lista pelos online e aways primeiro
-    //     this.rosterGroup?.contacts.sort((a, b) => {
-    //       if (a.presence?.type === PresenceType.Online && b.presence?.type !== PresenceType.Online) {
-    //         return -1;
-    //       } else if (a.presence?.type === PresenceType.Away && b.presence?.type !== PresenceType.Away) {
-    //         return -1;
-    //       } else {
-    //         return 1;
-    //       }
-    //     });
-    //   }
-    // });
+    this.initializeAndWatchPresences();
   }
+
+  initializeAndWatchPresences() {
+    if (!this.rosterGroup?.contacts) {
+      return;
+    }
+  
+    // Carrega as presenças iniciais
+    from(this.rosterGroup.contacts).pipe(
+      concatMap(contact => 
+        this.contactRepository.getContactPresence(contact.jid).pipe(
+          catchError(() => of({ jid: contact.jid, type: PresenceType.Offline })), 
+          tap(presence => this.contactPresences.set(contact.jid, presence))
+        )
+      ),
+    ).subscribe(() => {
+      this.sortContacts();
+    });
+
+    this.presenceService.getPresences().pipe(
+      filter(presence => presence && this.rosterGroup?.contacts.some(s => s.jid === presence.jid) ? true : false),
+      tap(presence => this.contactPresences.set(presence.jid, presence))
+    ).subscribe(() => {
+      this.sortContacts();
+    })
+  }
+
+  sortContacts() {
+    const sortedContacts = this.rosterGroup!.contacts.slice().sort((a, b) => {
+
+        const aPresence = this.contactPresences.get(a.jid)?.type || PresenceType.Offline;
+        const bPresence = this.contactPresences.get(b.jid)?.type || PresenceType.Offline;
+        
+        const presenceComparison = this.getPresenceWeight(aPresence) - this.getPresenceWeight(bPresence);
+        if (presenceComparison !== 0) {
+            return presenceComparison;
+        }
+        
+        return a.jid.localeCompare(b.jid);
+    });
+
+    this.rosterGroup!.contacts = sortedContacts;
+}
+
+getPresenceWeight(presenceType: string): number {
+    switch (presenceType) {
+        case PresenceType.Online: return 1;
+        case PresenceType.Away: return 2;
+        case PresenceType.DND: return 3;
+        default: return 4;
+    }
+}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['search']) {

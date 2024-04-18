@@ -1,5 +1,5 @@
 import { RosterRepository } from 'src/app/shared/repositories/roster/roster.repository';
-import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
@@ -14,6 +14,7 @@ import { ContactGroupModel } from '../../models/contact-group.model';
   templateUrl: './roster.component.html',
   styleUrls: ['./roster.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonList,
     IonSearchbar,
     IonContent,
@@ -23,6 +24,7 @@ import { ContactGroupModel } from '../../models/contact-group.model';
   ],
 })
 export class RosterComponent implements OnInit, OnDestroy {
+  public cdr = inject(ChangeDetectorRef);
   public rosterRepository = inject(RosterRepository);
   public contactResposioty = inject(ContactRepository);
 
@@ -58,6 +60,7 @@ export class RosterComponent implements OnInit, OnDestroy {
     )
     .subscribe((roster) => {
       this.rosterList = roster;
+      this.cdr.markForCheck();
     });
   }
 

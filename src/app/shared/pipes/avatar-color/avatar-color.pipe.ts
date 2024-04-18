@@ -11,10 +11,16 @@ export class AvatarColorPipe implements PipeTransform {
     switch (value) {
       case PresenceType.Online:
         return 'green';
-      case PresenceType.Offline:
+      case PresenceType.Away:
+        return 'orange';
+      case PresenceType.DND:
         return 'red';
-      default:
+      case PresenceType.XA:
         return 'yellow';
+      case PresenceType.Offline:
+        return 'grey';
+      default:
+        return 'grey';
     }
   }
 }

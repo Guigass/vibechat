@@ -1,8 +1,6 @@
-import { ChatService } from './../../services/chat/chat.service';
-import { AfterViewInit, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
-import { PresenceService } from '../../services/presence/presence.service';
+import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { ContactModel } from '../../models/contact.model';
-import { Subscription, catchError, distinct, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem } from "@ionic/angular/standalone";
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
@@ -10,8 +8,7 @@ import { MessageModel } from '../../models/message.model';
 import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { AvatarComponent } from '../avatar/avatar.component';
-import { ChatRepository } from '../../repositories/chat/chat.repository';
-import { XmppService } from '../../services/xmpp/xmpp.service';
+import { VCardModel } from '../../models/vcard.model';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -35,12 +32,13 @@ import { XmppService } from '../../services/xmpp/xmpp.service';
 export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() contact!: ContactModel;
 
-  public xmpp = inject(XmppService);
-  private chatRepository = inject(ChatRepository);
+  private cdr = inject(ChangeDetectorRef);
+
   private contactRepository = inject(ContactRepository);
 
-  private contactSubscription!: Subscription;
-  private messagesSubscription!: Subscription;
+  private contactInfoSubscription!: Subscription;
+
+  contactInfo!: VCardModel;
 
 
   unreadMessages = 0;
@@ -50,16 +48,18 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
   }
 
   ngOnInit() {
-
+    this.contactInfoSubscription = this.contactRepository.getContactInfoChanges(this.contact.jid).subscribe(contactInfo => {
+      this.contactInfo = contactInfo!;
+      this.cdr.markForCheck();
+    });
   }
 
   ngAfterViewInit(): void {
-
+    
   }
 
   ngOnDestroy(): void {
-    this.contactSubscription?.unsubscribe();
-    this.messagesSubscription?.unsubscribe();
+    this.contactInfoSubscription?.unsubscribe();
   }
 }
 
