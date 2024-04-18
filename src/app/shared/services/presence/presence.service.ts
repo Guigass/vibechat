@@ -11,10 +11,10 @@ import { PresenceModel } from '../../models/presence.model';
 export class PresenceService {
   private xmppService = inject(XmppService);
 
-  sendPresence(presenceType: PresenceType, statusMessage: string): Observable<void> {
+  sendPresence(presenceType: PresenceType, statusMessage?: string): Observable<void> {
     let presenceStanza = xml('presence', {},
-      xml('show', {}, presenceType === PresenceType.Online ? '' : presenceType.toLowerCase()),
-      xml('status', {}, presenceType === PresenceType.Online ? 'Online' : statusMessage)
+      xml('status', {}, PresenceType.Online),
+      statusMessage ? xml('show', {}, presenceType.toLowerCase()) : '',
     );
 
     return this.xmppService.sendStanza(presenceStanza);

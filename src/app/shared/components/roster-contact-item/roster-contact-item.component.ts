@@ -29,7 +29,7 @@ import { VCardModel } from '../../models/vcard.model';
     AvatarComponent
   ]
 })
-export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDestroy {
+export class RosterContactItemComponent implements OnInit, OnDestroy {
   @Input() contact!: ContactModel;
 
   private cdr = inject(ChangeDetectorRef);
@@ -52,10 +52,6 @@ export class RosterContactItemComponent implements OnInit, AfterViewInit, OnDest
       this.contactInfo = contactInfo!;
       this.cdr.markForCheck();
     });
-  }
-
-  ngAfterViewInit(): void {
-    
   }
 
   ngOnDestroy(): void {

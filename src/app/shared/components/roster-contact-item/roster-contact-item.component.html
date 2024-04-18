@@ -1,8 +1,8 @@
 <ion-item button routerDirection="root" routerLinkActive="selected" [routerLink]="'/app/chat/' + contact.jid" *ngIf="contact">
   <app-avatar [user]="contact"></app-avatar>
   <div class="contact-list">
-    <span *ngIf="contactInfo" title="{{contactInfo.givenName}} {{contactInfo.familyName}}">{{contactInfo.nickname}}</span>
     <span *ngIf="!contactInfo" title="{{contact.name}}">{{contact.name}}</span>
+    <span *ngIf="contactInfo && contactInfo.nickname" title="{{contactInfo.givenName}} {{contactInfo.familyName}}">{{contactInfo.nickname}}</span>
     <br>
     <!-- <small [title]="lastMessage.body" *ngIf="lastMessage && !contact.isTyping">
       {{lastMessage.timestamp | data}} - <strong *ngIf="lastMessage.from === xmpp.jid">Você:</strong> {{lastMessage.body}}
