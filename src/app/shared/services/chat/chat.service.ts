@@ -2,7 +2,7 @@ import { xml } from '@xmpp/client';
 import { Injectable, inject } from '@angular/core';
 import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
-import { Observable, catchError, distinctUntilChanged, filter, map, of, startWith, switchMap, tap, throwError, timer } from 'rxjs';
+import { Observable, catchError, defer, distinctUntilChanged, filter, map, max, of, startWith, switchMap, tap, throwError, timer } from 'rxjs';
 import { MessageModel } from '../../models/message.model';
 
 @Injectable({
@@ -124,7 +124,7 @@ export class ChatService {
       distinctUntilChanged());
   }
 
-  requestMessagesHistory(from: string, maxMessages: number, before?: string): Observable<void> {
+  getMessagesHistory(from: string, maxMessages?: number, startDate?: string, endDate?: string): Observable<any> {
     const mamQuery = xml(
       'iq',
       { type: 'set', id: 'mam-query' },
@@ -137,17 +137,25 @@ export class ChatService {
             xml('value', {}, from)
           ),
         ),
+        maxMessages ? 
         xml('set', { xmlns: 'http://jabber.org/protocol/rsm' },
-          xml('max', {}, maxMessages.toString()),
-          before ? xml('before', {}, before) : xml('before', {})
-        )
+          maxMessages ? xml('max', {}, maxMessages.toString()):'' 
+        ) : '',
+        startDate ? 
+        xml('field ', { var: 'start' },
+          xml('value', {}, startDate)
+        ) : '',
+        endDate ? 
+        xml('field ', { var: 'end' },
+          xml('value', {}, endDate)
+        ) : '',
       )
     );
 
-    return this.xmppService.sendStanza(mamQuery);
+    return this.xmppService.sendIq(mamQuery);
   }
 
-  getMessagesHistory(): Observable<MessageModel> {
+  getMessagesHistory2(): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
       filter(stanza =>
         stanza.getChild('result', 'urn:xmpp:mam:2') != null

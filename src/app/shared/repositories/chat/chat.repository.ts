@@ -27,4 +27,10 @@ export class ChatRepository {
     // this.watchUserTypingState();
     // this.watchMessagesFromServer();
   }
+
+  loadMessagesFromServer(from: string, maxMessages?: number, startDate?: string, endDate?: string): void {
+    this.chatService.getMessagesHistory(from, maxMessages, startDate, endDate).subscribe(messages => {
+      console.log('Mensagens carregadas do servidor:', messages);
+    });
+  }
 }

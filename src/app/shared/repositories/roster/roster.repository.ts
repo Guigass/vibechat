@@ -66,7 +66,6 @@ export class RosterRepository {
     this.ngZone.runOutsideAngular(() => {
       this.rosterService.getRosterUpdate().pipe(
         switchMap(contact => {
-          console.log(contact);
           if (contact.subscription !== 'both') {
             return from(this.db.contacts.where('jid').equals(contact.jid).first()).pipe(
               switchMap(existContact => 

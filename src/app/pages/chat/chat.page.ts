@@ -109,6 +109,8 @@ export class ChatPage implements OnInit, OnDestroy {
       this.isTyping = false;
     });
 
+    this.chatRepository.loadMessagesFromServer(this.jid, 10);
+
     // this.messagesSubscription = this.chatRepository.messages.pipe(
     //   filter((message) => message != null),
     //   filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
