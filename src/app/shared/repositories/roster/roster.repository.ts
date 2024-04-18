@@ -1,5 +1,5 @@
 import { Injectable, NgZone, inject } from '@angular/core';
-import { BehaviorSubject, ReplaySubject, distinctUntilChanged, filter, mergeMap, share, take, timer } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, catchError, distinctUntilChanged, filter, from, mergeMap, of, share, switchMap, take, tap, timer } from 'rxjs';
 import { RosterService } from '../../services/roster/roster.service';
 import { DatabaseService } from '../../services/database/database.service';
 import { ContactGroupModel } from '../../models/contact-group.model';
@@ -64,32 +64,36 @@ export class RosterRepository {
 
   private watchForRosterUpdates() {
     this.ngZone.runOutsideAngular(() => {
-      this.rosterService.getRosterUpdate()
-        .subscribe((contact) => {
+      this.rosterService.getRosterUpdate().pipe(
+        switchMap(contact => {
+          console.log(contact);
           if (contact.subscription !== 'both') {
-            this.db.contacts.where('jid').equals(contact.jid).first().then(async (existContact) => {
-              if (existContact) {
-                await this.db.contacts.delete(existContact.id!);
-                await this.db.presences.where('jid').equals(contact.jid).delete();
-                await this.db.contactsInfo.where('jid').equals(contact.jid).delete();
-              }
-            });
+            return from(this.db.contacts.where('jid').equals(contact.jid).first()).pipe(
+              switchMap(existContact => 
+                existContact ? from(Promise.all([
+                  this.db.contacts.delete(existContact.id!),
+                  this.db.presences.where('jid').equals(contact.jid).delete(),
+                  this.db.contactsInfo.where('jid').equals(contact.jid).delete()
+                ])) : of(null)
+              )
+            );
           } else {
-            this.db.contacts.where('jid').equals(contact.jid).first().then(async (existContact) => {
-              if (existContact) {
-                await this.db.contacts.update(existContact.id!, { ...contact });
-              } else {
-                await this.db.contacts.add(contact);
-                await this.db.presences.add({ jid: contact.jid, type: PresenceType.Offline, status: '' });
-                await this.db.contactsInfo.add({ jid: contact.jid, fullname: contact.name, nickname: '', email: '', phone: '', givenName: '', familyName: '', avatar: '' });
-              }
-            });
+            return from(this.db.contacts.where('jid').equals(contact.jid).first()).pipe(
+              switchMap(existContact => 
+                existContact ? this.db.contacts.update(existContact.id!, { ...contact }) :
+                from(this.db.contacts.add(contact)).pipe(
+                  switchMap(() => Promise.all([
+                    this.db.presences.add({ jid: contact.jid, type: PresenceType.Offline, status: '' }),
+                    this.db.contactsInfo.add({ jid: contact.jid, fullname: contact.name, nickname: '', email: '', phone: '', givenName: '', familyName: '', avatar: '' })
+                  ]))
+                )
+              )
+            );
           }
-
-          this.db.contacts.toArray().then((contacts) => {
-            this.rosterList$.next(contacts);
-          });
-        });
+        }),
+        switchMap(() => from(this.db.contacts.toArray())),
+        tap(contacts => this.rosterList$.next(contacts))
+      ).subscribe();
     });
   }
 }

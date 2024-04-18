@@ -31,7 +31,7 @@ export class AppPage {
   constructor() {
     this.db.dbReady.pipe(
       filter(ready => ready),
-      debounceTime(1000)
+      debounceTime(1150)
     ).subscribe(() => {
       this.splashScreenService.hide();
     });

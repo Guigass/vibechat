@@ -55,6 +55,8 @@ export class RosterComponent implements OnInit, OnDestroy {
 
         const groupedContacts: ContactGroupModel[] = Array.from(groupsMap.values());
 
+        console.log(groupedContacts);
+
         return groupedContacts;
       })
     )

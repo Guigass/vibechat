@@ -103,7 +103,7 @@ export class ChatPage implements OnInit, OnDestroy {
 
     this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
       if (this.isTyping && this.contact) {
-        this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
+        //this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
       }
 
       this.isTyping = false;
@@ -130,15 +130,15 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
-      msg.value = '';
-      msg.setFocus();
-    });
+    //this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
+    //  msg.value = '';
+    //  msg.setFocus();
+    //});
   }
 
   typing(event: any) {
     if (!this.isTyping && this.contact) {
-      this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
+      //this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
     }
 
     this.isTyping = true;
