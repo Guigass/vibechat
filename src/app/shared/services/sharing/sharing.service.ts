@@ -52,7 +52,7 @@ export class SharingService {
   private requestUploadSlot(fileName: string, fileSize: number, fileId: string, contentType: string): Observable<any> {
     return this.xmppServicesService.services$.pipe(
       filter(services => services.length > 0),
-      map((services: XmppServicesModel[]) => services.filter(service => service.jid.includes("httpfileupload"))),
+      map((services: XmppServicesModel[]) => services.filter(service => service.jid.includes("upload"))),
       switchMap((services) => {
         return of(services[0].jid);
       }),
