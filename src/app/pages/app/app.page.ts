@@ -4,8 +4,8 @@ import { CommonModule } from '@angular/common';
 import { IonApp, IonSplitPane, IonMenu, IonContent, IonRouterOutlet, IonHeader, IonToolbar, IonTitle, IonFooter, IonItem, IonImg } from '@ionic/angular/standalone';
 import { AsideComponent } from 'src/app/shared/components/aside/aside.component';
 import { TabsComponent } from 'src/app/shared/components/tabs/tabs.component';
-import { DatabaseService } from 'src/app/shared/services/database/database.service';
-import { debounceTime } from 'rxjs';
+import { debounceTime, filter } from 'rxjs';
+import { Database2Service } from 'src/app/shared/services/database/database2.service';
 
 @Component({
   selector: 'app-app',
@@ -25,14 +25,15 @@ import { debounceTime } from 'rxjs';
   ],
 })
 export class AppPage {
-  private db = inject(DatabaseService);
+  private db = inject(Database2Service);
   private splashScreenService = inject(SplashScreenService);
 
   constructor() {
-    this.db.init().pipe(debounceTime(1000)).subscribe((ready) => {
-      if (ready) {
-        this.splashScreenService.hide();
-      }
+    this.db.dbReady.pipe(
+      filter(ready => ready),
+      debounceTime(1000)
+    ).subscribe(() => {
+      this.splashScreenService.hide();
     });
   }
 
