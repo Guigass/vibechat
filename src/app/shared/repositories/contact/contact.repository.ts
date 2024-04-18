@@ -9,6 +9,7 @@ import { PresenceModel } from '../../models/presence.model';
 import { Database2Service } from '../../services/database/database2.service';
 import { VCardModel } from '../../models/vcard.model';
 import { liveQuery } from 'dexie';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Injectable({
   providedIn: 'root'
@@ -30,8 +31,12 @@ export class ContactRepository {
     this.ngZone.runOutsideAngular(() => {
       this.updateUsersInfo().pipe(
         finalize(() => {
-          console.log('Users info updated');
-          this.watchForPresenceUpdates();
+
+          this.setAllOfline().pipe(
+            finalize(() => {
+              this.watchForPresenceUpdates();
+            })
+          ).subscribe();
         })
       ).subscribe();
     });
@@ -130,23 +135,32 @@ export class ContactRepository {
     );
   }
 
+  private setAllOfline() {
+    return from(this.db.presences.toArray()).pipe(
+      switchMap(presences => {
+        return from(Promise.all(presences.map(presence => this.db.presences.update(presence.id!, { status: 'offline', show: 'offline' }))));
+      })
+    );
+  }
+
   private watchForPresenceUpdates() {
     this.ngZone.runOutsideAngular(() => {
-      this.db.presences.$.toArray().pipe(
-        switchMap(presences =>
-          Promise.all(presences.map(presence => this.db.presences.update(presence.id!, { status: 'offline', show: 'offline' })))
-        ),
+      this.presenceService.getPresences().pipe(
         switchMap(() => this.presenceService.getPresences()),
-        switchMap(presence =>
-          from(this.db.presences.where('jid').equals(presence.jid).first()).pipe(
-            switchMap(presenceData =>
-              presenceData ?
-                from(this.db.presences.update(presenceData.id!, presence)) :
-                from(this.db.presences.add(presence))
+        switchMap(presence => {
+          console.log('Presence', presence);
+          return from(this.db.presences.where('jid').equals(presence.jid).first()).pipe(
+            switchMap(presenceData => {
+              console.log('Presence', presenceData);
+              return presenceData ?
+              from(this.db.presences.update(presenceData.id!, presence)) :
+              from(this.db.presences.add(presence))
+            }
+              
             ),
             switchMap(() => this.updateVCardIfNeeded(presence.jid))
           )
-        )
+        })
       ).subscribe();
     });
   }
