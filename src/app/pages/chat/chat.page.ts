@@ -1,5 +1,5 @@
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { Component, OnDestroy, OnInit, ViewChild, inject, viewChild, input, Input, EventEmitter } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   IonButton,
@@ -71,7 +71,6 @@ export class ChatPage implements OnInit, OnDestroy {
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
-  public fileOver:EventEmitter<any> = new EventEmitter()
 
   private typingSubject = new Subject<void>();
   private isTyping = false;
