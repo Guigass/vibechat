@@ -124,7 +124,7 @@ export class ChatService {
       distinctUntilChanged());
   }
 
-  getMessagesHistory(from: string, maxMessages?: number, startDate?: string, endDate?: string): Observable<any> {
+  requestMessagesHistory(from: string, maxMessages?: number, startDate?: string, endDate?: string): Observable<any> {
     const mamQuery = xml(
       'iq',
       { type: 'set', id: 'mam-query' },
@@ -152,15 +152,25 @@ export class ChatService {
       )
     );
 
-    return this.xmppService.sendIq(mamQuery);
+    return this.xmppService.sendStanza(mamQuery);
   }
 
-  getMessagesHistory2(): Observable<MessageModel> {
+  onMessagesHistory(from: string): Observable<MessageModel> {
     return this.xmppService.onStanza$.pipe(
-      filter(stanza =>
-        stanza.getChild('result', 'urn:xmpp:mam:2') != null
-      ),
+      filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2') != null),
+      filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0') != null),
+      filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client') != null),
+      filter(stanza => 
+        stanza
+        .getChild('result', 'urn:xmpp:mam:2')
+        .getChild('forwarded', 'urn:xmpp:forward:0')
+        .getChild('message', 'jabber:client').attrs.from.split('/')[0] === from || 
+        stanza
+        .getChild('result', 'urn:xmpp:mam:2')
+        .getChild('forwarded', 'urn:xmpp:forward:0')
+        .getChild('message', 'jabber:client').attrs.to.split('/')[0] === from),
       map(stanza => {
+        console.log('MAM Query result:', stanza);
         const result = stanza.getChild('result', 'urn:xmpp:mam:2');
         const forwarded = result.getChild('forwarded', 'urn:xmpp:forward:0');
         const message = forwarded.getChild('message', 'jabber:client');

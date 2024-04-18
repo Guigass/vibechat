@@ -29,8 +29,11 @@ export class ChatRepository {
   }
 
   loadMessagesFromServer(from: string, maxMessages?: number, startDate?: string, endDate?: string): void {
-    this.chatService.getMessagesHistory(from, maxMessages, startDate, endDate).subscribe(messages => {
-      console.log('Mensagens carregadas do servidor:', messages);
-    });
+    this.chatService.requestMessagesHistory(from, maxMessages, startDate, endDate).subscribe();
+
+    this.chatService.onMessagesHistory(from).subscribe((resp) => {
+      console.log('resp', resp);
+
+    })
   }
 }
