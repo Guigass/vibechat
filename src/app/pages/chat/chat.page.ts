@@ -25,9 +25,11 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subject, Subscription, debounceTime } from 'rxjs';
+import { Subject, Subscription, debounceTime, timer } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { ngfModule, ngf, ngfDrop } from 'angular-file';
+import { NgScrollbar, NgScrollbarModule } from 'ngx-scrollbar';
+import { CdkVirtualForOf, ScrollingModule } from '@angular/cdk/scrolling';
 
 @Component({
   selector: 'app-chat',
@@ -52,10 +54,14 @@ import { ngfModule, ngf, ngfDrop } from 'angular-file';
     AvatarComponent,
     PickerComponent,
     ngfModule,
+    NgScrollbarModule,
+    ScrollingModule
   ],
 })
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
+  @ViewChild(NgScrollbar, { static: true }) scrollable!: NgScrollbar;
+  
   mensages!: MessageModel[];
   jid!: string;
   contact!: ContactModel | null;
@@ -70,12 +76,8 @@ export class ChatPage implements OnInit, OnDestroy {
   private contactRepository = inject(ContactRepository);
   private sharingService = inject(SharingService);
 
-  private typingSubject = new Subject<void>();
-  private isTyping = false;
-
+  messagesHistorySubscription!: Subscription;
   messagesSubscription!: Subscription;
-
-  private messag!: MessageModel;
 
   constructor() {
     addIcons({
@@ -95,33 +97,25 @@ export class ChatPage implements OnInit, OnDestroy {
 
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.contact = contact!;
-      console.log(this.contact);
     });
 
-    this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
-      if (this.isTyping && this.contact) {
-        //this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
-      }
-
-      this.isTyping = false;
+    this.messagesSubscription = this.chatRepository.getNewMessages(this.jid).subscribe((message) => {
+      this.mensages.push(message);
+      this.chatScroll();
     });
 
-    this.chatRepository.loadMessagesFromServer(this.jid, 10);
+    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid, 20).subscribe((messages) => {
+      this.mensages = messages;
+      console.log('Messages', messages);
+      this.chatScroll();
+    }, () => {
 
-    // this.messagesSubscription = this.chatRepository.messages.pipe(
-    //   filter((message) => message != null),
-    //   filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
-    // ).subscribe((message) => {
-    //   console.log('message', message);
-    //   this.mensages.push(message!);
-    // });
+    }, () => {
+      console.log('Complete');
+    });
+  }
 
-    // this.chatRepository.getSetMessagesAsRead(this.jid).pipe(take(1))
-    // .subscribe((messages) => {
-    //   this.mensages = messages;
-    // });
-
-    // this.chatRepository.requestMessagesHistory(this.jid, 10, '');
+  getMessageHistory() {
   }
 
   sendMessage(msg: any) {
@@ -129,29 +123,18 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    //this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
-    //  msg.value = '';
-    //  msg.setFocus();
-    //});
-  }
+    this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
+     msg.value = '';
+     msg.setFocus();
 
-  typing(event: any) {
-    if (!this.isTyping && this.contact) {
-      //this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
-    }
-
-    this.isTyping = true;
-    this.typingSubject.next();
-  }
-
-  ngOnDestroy(): void {
-    this.typingSubject.complete();
-    this.messagesSubscription?.unsubscribe();
+      this.chatScroll();
+    });
   }
 
   addEmoji(evnt: any) {
     this.txtaMsg.value += evnt.emoji.native;
   }
+
   sendFile(evt: any) {
 
     this.file = evt;
@@ -172,5 +155,16 @@ export class ChatPage implements OnInit, OnDestroy {
 
   openEmoji() {
     this.showPreview = this.showPreview ? false : true;
+  }
+
+  chatScroll(){
+    timer(100).subscribe(() => {
+      this.scrollable.scrollTo({ bottom: 0 });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.messagesHistorySubscription?.unsubscribe();
+    this.messagesSubscription?.unsubscribe();
   }
 }
