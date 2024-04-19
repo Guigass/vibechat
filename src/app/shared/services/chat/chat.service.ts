@@ -121,7 +121,7 @@ export class ChatService {
       distinctUntilChanged());
   }
 
-  requestMessagesHistory(id: string, from: string, maxMessages?: number, startDate?: string, endDate?: string): Observable<any> {
+  requestMessagesHistory(id: string, from: string, maxMessages?: number, before?: string, startDate?: string, endDate?: string): Observable<any> {
     const mamQuery = xml(
       'iq',
       { type: 'set', id: id },
@@ -140,6 +140,9 @@ export class ChatService {
           endDate ?
             xml('field ', { var: 'end' },
               xml('value', {}, endDate)
+            ) : '',
+          before ? xml('field', { var: 'before' }, 
+              xml('value', {}, before)
             ) : '',
         ),
         maxMessages ?
@@ -190,8 +193,11 @@ export class ChatService {
       filter(stanza => stanza.attrs.type === 'result'),
       filter(stanza => stanza.getChild('fin', 'urn:xmpp:mam:2') != null),
       map(stanza => {
-        console.log('Complete');
-        return stanza;
+        return { 
+          complete: stanza.getChild('fin', 'urn:xmpp:mam:2').attr.complete, 
+          last: stanza.getChild('fin', 'urn:xmpp:mam:2').getChildText('set', 'http://jabber.org/protocol/rsm', 'last'), 
+          first: stanza.getChild('fin', 'urn:xmpp:mam:2').getChildText('set', 'http://jabber.org/protocol/rsm', 'first')
+        };
       }),
     );
   }
