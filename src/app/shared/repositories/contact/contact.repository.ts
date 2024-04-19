@@ -29,16 +29,10 @@ export class ContactRepository {
 
   private init() {
     this.ngZone.runOutsideAngular(() => {
-      this.updateUsersInfo().pipe(
-        finalize(() => {
-
-          this.setAllOfline().pipe(
-            finalize(() => {
-              this.watchForPresenceUpdates();
-            })
-          ).subscribe();
-        })
-      ).subscribe();
+      this.updateUsersInfo().subscribe();
+      this.setAllOfline().subscribe(() => {
+        this.watchForPresenceUpdates();
+      })
     });
   }
 
@@ -146,18 +140,13 @@ export class ContactRepository {
   private watchForPresenceUpdates() {
     this.ngZone.runOutsideAngular(() => {
       this.presenceService.getPresences().pipe(
-        switchMap(() => this.presenceService.getPresences()),
         switchMap(presence => {
-          console.log('Presence', presence);
           return from(this.db.presences.where('jid').equals(presence.jid).first()).pipe(
             switchMap(presenceData => {
-              console.log('Presence', presenceData);
               return presenceData ?
               from(this.db.presences.update(presenceData.id!, presence)) :
               from(this.db.presences.add(presence))
-            }
-              
-            ),
+            }),
             switchMap(() => this.updateVCardIfNeeded(presence.jid))
           )
         })
