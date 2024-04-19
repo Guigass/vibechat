@@ -1,3 +1,4 @@
+import { SharingService } from './../../shared/services/sharing/sharing.service';
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -26,9 +27,7 @@ import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.compone
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
 import { Subject, Subscription, debounceTime } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
-import { ngfModule, ngf ,ngfDrop } from "angular-file"
-
-
+import { ngfModule, ngf, ngfDrop } from 'angular-file';
 
 @Component({
   selector: 'app-chat',
@@ -54,7 +53,6 @@ import { ngfModule, ngf ,ngfDrop } from "angular-file"
     PickerComponent,
     ngfModule,
   ],
-
 })
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
@@ -62,19 +60,22 @@ export class ChatPage implements OnInit, OnDestroy {
   jid!: string;
   contact!: ContactModel | null;
 
-
-  public files: any;
+  public file: any;
   public emoji: any;
   public showPreview = false;
+  private lastUsedId: number = 1;
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
+  private sharingService = inject(SharingService);
 
   private typingSubject = new Subject<void>();
   private isTyping = false;
 
-  messagesSubscription!: Subscription;;
+  messagesSubscription!: Subscription;
+
+  private messag!: MessageModel;
 
   constructor() {
     addIcons({
@@ -86,11 +87,7 @@ export class ChatPage implements OnInit, OnDestroy {
     this.navCtrl.setDirection('root');
   }
 
-
-
   ngOnInit() {
-    console.log(this.files)
-
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
       this.jid = jidquery;
@@ -98,6 +95,7 @@ export class ChatPage implements OnInit, OnDestroy {
 
     this.contactRepository.getContact(this.jid).subscribe((contact) => {
       this.contact = contact!;
+      console.log(this.contact);
     });
 
     this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
@@ -153,25 +151,26 @@ export class ChatPage implements OnInit, OnDestroy {
 
   addEmoji(evnt: any) {
     this.txtaMsg.value += evnt.emoji.native;
-
   }
-  sendFile(evnt: any) {
-    setTimeout(() => {
-      console.log(this.files.name)
-      this.txtaMsg.value += this.files.name;
-  }, 1000);
+  sendFile(evt: any) {
+
+    this.file = evt;
+    let id = this.lastUsedId;
+    this.lastUsedId++;
+
+    if (this.file && !this.file.id) {
+      this.file.id = id;
+
+      this.sharingService
+        .shareFile(this.file, this.lastUsedId.toString())
+        .subscribe((resp) => {
+          console.log('Ola', resp);
+        });
+
+    }
   }
 
   openEmoji() {
     this.showPreview = this.showPreview ? false : true;
   }
-
-  getDate(){
-
-  }
-
 }
-
-
-
-

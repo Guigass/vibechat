@@ -11,7 +11,7 @@ import { XmppServicesModel } from '../../models/xmpp-services.model';
 })
 export class SharingService {
   private xmppService = inject(XmppService);
-  private xmppServicesService = inject(XmppServicesService); 
+  private xmppServicesService = inject(XmppServicesService);
   private httpClient = inject(HttpClient);
 
   private uploadProgressSource = new Subject<{fileId: string, progress: number}>();
@@ -31,6 +31,7 @@ export class SharingService {
     return this.httpClient.put(url.put, file, {
       headers: { 'Content-Type': contentType },
       reportProgress: true,
+      responseType: 'text',
       observe: 'events'
     }).pipe(
       tap(event => {
@@ -60,7 +61,7 @@ export class SharingService {
         const iq = xml('iq', { type: 'get', id: fileId, to: to },
           xml('request', { xmlns: 'urn:xmpp:http:upload:0', filename: fileName, size: fileSize.toString(), 'content-type': contentType })
         );
-    
+
         return this.xmppService.sendStanza(iq).pipe(map(() => fileId));
       })
     );
