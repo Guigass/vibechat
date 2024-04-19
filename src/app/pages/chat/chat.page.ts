@@ -1,7 +1,7 @@
 import { SharingService } from './../../shared/services/sharing/sharing.service';
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   IonButton,
   IonContent,
@@ -25,11 +25,11 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subject, Subscription, debounceTime, timer } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
-import { ngfModule, ngf, ngfDrop } from 'angular-file';
-import { NgScrollbar, NgScrollbarModule } from 'ngx-scrollbar';
-import { CdkVirtualForOf, ScrollingModule } from '@angular/cdk/scrolling';
+import { ngfModule } from 'angular-file';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import { PageScrollService } from 'ngx-page-scroll-core';
 
 @Component({
   selector: 'app-chat',
@@ -54,27 +54,30 @@ import { CdkVirtualForOf, ScrollingModule } from '@angular/cdk/scrolling';
     AvatarComponent,
     PickerComponent,
     ngfModule,
-    NgScrollbarModule,
     ScrollingModule
   ],
 })
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
-  @ViewChild(NgScrollbar, { static: true }) scrollable!: NgScrollbar;
+  @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
   
-  mensages!: MessageModel[];
+  messages!: MessageModel[];
   jid!: string;
   contact!: ContactModel | null;
+
+  
 
   public file: any;
   public emoji: any;
   public showPreview = false;
   private lastUsedId: number = 1;
+  private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
   private sharingService = inject(SharingService);
+  private pageScrollService = inject(PageScrollService);
 
   messagesHistorySubscription!: Subscription;
   messagesSubscription!: Subscription;
@@ -100,18 +103,15 @@ export class ChatPage implements OnInit, OnDestroy {
     });
 
     this.messagesSubscription = this.chatRepository.getNewMessages(this.jid).subscribe((message) => {
-      this.mensages.push(message);
+      this.messages = [...this.messages, message];
+
       this.chatScroll();
     });
 
-    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid, 20).subscribe((messages) => {
-      this.mensages = messages;
-      console.log('Messages', messages);
-      this.chatScroll();
-    }, () => {
+    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid, 100).subscribe((messages) => {
+      this.messages = [...messages];
 
-    }, () => {
-      console.log('Complete');
+      this.chatScroll();
     });
   }
 
@@ -124,8 +124,8 @@ export class ChatPage implements OnInit, OnDestroy {
     }
 
     this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
-     msg.value = '';
-     msg.setFocus();
+      msg.value = '';
+      msg.setFocus();
 
       this.chatScroll();
     });
@@ -158,8 +158,11 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   chatScroll(){
-    timer(100).subscribe(() => {
-      this.scrollable.scrollTo({ bottom: 0 });
+    timer(250).subscribe(() => {
+      this.viewport.scrollTo({
+        bottom: 0,
+        behavior: 'smooth',
+      });
     });
   }
 

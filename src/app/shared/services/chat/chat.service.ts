@@ -16,10 +16,10 @@ export class ChatService {
 
     var message =
       xml('message', { to: to, type: 'chat', id: id },
-      xml('body', {}, body),
-      xml('markable', 'urn:xmpp:chat-markers:0'),
-      xml('request', 'urn:xmpp:receipts'),
-    );
+        xml('body', {}, body),
+        xml('markable', 'urn:xmpp:chat-markers:0'),
+        xml('request', 'urn:xmpp:receipts'),
+      );
 
     return this.xmppService.sendStanza(message)
       .pipe(
@@ -27,7 +27,7 @@ export class ChatService {
           console.error('Erro ao enviar mensagem:', error);
           return throwError(() => new Error('Falha ao enviar mensagem'));
         }),
-        map(() => { 
+        map(() => {
           const msg = new MessageModel(this.xmppService.jid, to, body, new Date(), id);
           msg.read = true;
           return msg;
@@ -48,7 +48,7 @@ export class ChatService {
         const from = stanza.attrs.from.split('/')[0];
         const to = stanza.attrs.to.split('/')[0];
         const messageId = stanza.attrs.id;
-        
+
         this.sendReceipt(from, messageId).subscribe();
 
         return new MessageModel(from, to, body, timestamp, messageId, true, false);
@@ -65,14 +65,14 @@ export class ChatService {
         if (stanza.getChild('composing', 'http://jabber.org/protocol/chatstates')) {
           return timer(5000).pipe(
             map(() => {
-              return {jid: from, isTyping: false};
+              return { jid: from, isTyping: false };
             }),
-            startWith({jid: from, isTyping: true})
+            startWith({ jid: from, isTyping: true })
           );
         } else if (stanza.getChild('paused', 'http://jabber.org/protocol/chatstates')) {
-          return of({jid: from, isTyping: false});
+          return of({ jid: from, isTyping: false });
         }
-        return of({jid: from, isTyping: false});
+        return of({ jid: from, isTyping: false });
       }),
       distinctUntilChanged());
   }
@@ -80,8 +80,8 @@ export class ChatService {
   setTyping(to: string, isTyping: boolean): Observable<any> {
     var message =
       xml('message', { to: to, type: 'chat', id: uuidv4() },
-      isTyping ? xml('composing', { xmlns: 'http://jabber.org/protocol/chatstates' }) : xml('paused', { xmlns: 'http://jabber.org/protocol/chatstates' }),
-    );
+        isTyping ? xml('composing', { xmlns: 'http://jabber.org/protocol/chatstates' }) : xml('paused', { xmlns: 'http://jabber.org/protocol/chatstates' }),
+      );
 
     return this.xmppService.sendStanza(message);
   }
@@ -133,19 +133,20 @@ export class ChatService {
           xml('field', { var: 'with' },
             xml('value', {}, from)
           ),
+          startDate ?
+            xml('field ', { var: 'start' },
+              xml('value', {}, startDate)
+            ) : '',
+          endDate ?
+            xml('field ', { var: 'end' },
+              xml('value', {}, endDate)
+            ) : '',
         ),
-        maxMessages ? 
-        xml('set', { xmlns: 'http://jabber.org/protocol/rsm' },
-          maxMessages ? xml('max', {}, maxMessages.toString()):'' 
-        ) : '',
-        startDate ? 
-        xml('field ', { var: 'start' },
-          xml('value', {}, startDate)
-        ) : '',
-        endDate ? 
-        xml('field ', { var: 'end' },
-          xml('value', {}, endDate)
-        ) : '',
+        maxMessages ?
+          xml('set', { xmlns: 'http://jabber.org/protocol/rsm' },
+            maxMessages ? xml('max', {}, maxMessages.toString()) : '',
+          ) : '',
+        xml('flip-page', {}, '')
       )
     );
 
@@ -157,16 +158,16 @@ export class ChatService {
       filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2') != null),
       filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0') != null),
       filter(stanza => stanza.getChild('result', 'urn:xmpp:mam:2').getChild('forwarded', 'urn:xmpp:forward:0').getChild('message', 'jabber:client') != null),
-      filter(stanza => 
+      filter(stanza =>
         stanza
-        .getChild('result', 'urn:xmpp:mam:2')
-        .getChild('forwarded', 'urn:xmpp:forward:0')
-        .getChild('message', 'jabber:client').attrs.from.split('/')[0] === from || 
+          .getChild('result', 'urn:xmpp:mam:2')
+          .getChild('forwarded', 'urn:xmpp:forward:0')
+          .getChild('message', 'jabber:client').attrs.from.split('/')[0] === from ||
         stanza
-        .getChild('result', 'urn:xmpp:mam:2')
-        .getChild('forwarded', 'urn:xmpp:forward:0')
-        .getChild('message', 'jabber:client').attrs.to.split('/')[0] === from),
-        takeUntil(this.onMessagesHistoryComplete(id)),
+          .getChild('result', 'urn:xmpp:mam:2')
+          .getChild('forwarded', 'urn:xmpp:forward:0')
+          .getChild('message', 'jabber:client').attrs.to.split('/')[0] === from),
+      takeUntil(this.onMessagesHistoryComplete(id)),
       map(stanza => {
         const result = stanza.getChild('result', 'urn:xmpp:mam:2');
         const forwarded = result.getChild('forwarded', 'urn:xmpp:forward:0');
@@ -186,9 +187,10 @@ export class ChatService {
     return this.xmppService.onStanza$.pipe(
       filter(stanza => stanza.is('iq')),
       filter(stanza => stanza.attrs.id === id),
+      filter(stanza => stanza.attrs.type === 'result'),
       filter(stanza => stanza.getChild('fin', 'urn:xmpp:mam:2') != null),
-      filter(stanza => stanza.getChild('fin', 'urn:xmpp:mam:2').attrs.complete === 'true'),
       map(stanza => {
+        console.log('Complete');
         return stanza;
       }),
     );
@@ -196,18 +198,18 @@ export class ChatService {
 
   sendReceipt(to: string, id: string): Observable<any> {
     var message =
-    xml('message', { to: to, type: 'chat', id: uuidv4() },
-    xml('received', { xmlns: 'urn:xmpp:receipts', id: id }),
-    );
+      xml('message', { to: to, type: 'chat', id: uuidv4() },
+        xml('received', { xmlns: 'urn:xmpp:receipts', id: id }),
+      );
 
     return this.xmppService.sendStanza(message);
   }
 
   sendReadReceipt(to: string, id: string): Observable<any> {
     var message =
-    xml('message', { to: to, type: 'chat', id: uuidv4() },
-    xml('displayed', { xmlns: 'urn:xmpp:chat-markers:0', id: id }),
-    );
+      xml('message', { to: to, type: 'chat', id: uuidv4() },
+        xml('displayed', { xmlns: 'urn:xmpp:chat-markers:0', id: id }),
+      );
 
     return this.xmppService.sendStanza(message);
   }

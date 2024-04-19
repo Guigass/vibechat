@@ -42,6 +42,7 @@
     "dexie": "^3.2.7",
     "ionicons": "^7.2.1",
     "localforage-cordovasqlitedriver": "^1.8.0",
+    "ngx-page-scroll": "^12.0.0",
     "ngx-scrollbar": "^14.1.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

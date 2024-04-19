@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { ContactModel } from '../../models/contact.model';
 import { Subscription } from 'rxjs';
 import { IonIcon, IonBadge, IonImg, IonAvatar, IonItem } from "@ionic/angular/standalone";
@@ -14,6 +14,7 @@ import { VCardModel } from '../../models/vcard.model';
   selector: 'app-roster-contact-item',
   templateUrl: './roster-contact-item.component.html',
   styleUrls: ['./roster-contact-item.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     IonItem,

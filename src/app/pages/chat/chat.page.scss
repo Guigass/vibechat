@@ -16,3 +16,8 @@ ion-avatar {
   outline: 2.5px solid;
   margin-left: 5px;
 }
+
+cdk-virtual-scroll-viewport {
+  height: 100%;
+  width: 100%;
+}

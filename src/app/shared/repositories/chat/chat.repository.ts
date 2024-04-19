@@ -36,7 +36,7 @@ export class ChatRepository {
     return this.chatService.sendMessage(body, to).pipe(
       tap((message) => {
 
-        //this.db.messages.add(message);
+        this.db.messages.add(message);
         this.message.next(message);
       })
     );
