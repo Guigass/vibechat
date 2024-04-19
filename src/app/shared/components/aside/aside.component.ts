@@ -4,6 +4,7 @@ import { IonHeader, IonContent, IonSegment, IonSegmentButton, IonLabel, IonToolb
 import { RosterComponent } from '../roster/roster.component';
 
 @Component({
+  
   selector: 'app-aside',
   templateUrl: './aside.component.html',
   styleUrls: ['./aside.component.scss'],

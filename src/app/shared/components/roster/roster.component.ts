@@ -15,7 +15,10 @@ import { ContactGroupModel } from '../../models/contact-group.model';
   styleUrls: ['./roster.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonLabel, IonItem, IonList,
+  imports: [
+    IonLabel, 
+    IonItem, 
+    IonList,
     IonSearchbar,
     IonContent,
     CommonModule,
