@@ -1,6 +1,6 @@
 import { SharingService } from './../../shared/services/sharing/sharing.service';
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   IonButton,
@@ -61,11 +61,12 @@ export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
   @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
   
-  messages!: MessageModel[];
-  jid!: string;
-  contact!: ContactModel | null;
+  //messages!: MessageModel[];
+  messages = signal<MessageModel[]>([]);
 
+  jid = signal('');
   
+  contact!: ContactModel | null;
 
   public file: any;
   public emoji: any;
@@ -95,21 +96,23 @@ export class ChatPage implements OnInit, OnDestroy {
   ngOnInit() {
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
-      this.jid = jidquery;
+      this.jid.set(jidquery);
     }
 
-    this.contactRepository.getContact(this.jid).subscribe((contact) => {
+    this.contactRepository.getContact(this.jid()).subscribe((contact) => {
       this.contact = contact!;
     });
 
-    this.messagesSubscription = this.chatRepository.getNewMessages(this.jid).subscribe((message) => {
-      this.messages = [...this.messages, message];
+    this.messagesSubscription = this.chatRepository.getNewMessages(this.jid()).subscribe((message) => {
+      this.messages.update((values) => {
+        return [...values, message];
+      })
 
       this.chatScroll();
     });
 
-    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid, 100).subscribe((messages) => {
-      this.messages = [...messages];
+    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid(), 100).subscribe((messages) => {
+      this.messages.set(messages);
 
       this.chatScroll();
     });
@@ -123,7 +126,7 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
+    this.chatRepository.sendMessage(msg.value, this.jid()).subscribe(() => {
       msg.value = '';
       msg.setFocus();
 

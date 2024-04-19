@@ -1,27 +1,27 @@
 
 <div id="chat-container">
-    <div class="content" *ngIf="user?.jid === message.to">
-      <app-avatar [user]="user"></app-avatar>
+    <div class="content" *ngIf="user()?.jid === message()!.to">
+      <app-avatar [user]="user()"></app-avatar>
       <div class="bubble">
         <strong>
-          {{message.from}}
+          {{message()!.from}}
         </strong>
         <p>
-          {{message.body}}
+          {{message()!.body}}
         </p>
-        <p>{{message.timestamp | date}}</p>
+        <p>{{message()!.timestamp | date}}</p>
       </div>
     </div>
-    <div class="content right" *ngIf="user?.jid === message.from">
-      <app-avatar [user]="user"></app-avatar>
+    <div class="content right" *ngIf="user()?.jid === message()!.from">
+      <app-avatar [user]="user()"></app-avatar>
       <div class="bubble right">
         <strong>
-          {{message.from}}
+          {{message()!.from}}
         </strong>
         <p>
-          {{message.body}}
+          {{message()!.body}}
         </p>
-        <p>{{message.timestamp | date}}</p>
+        <p>{{message()!.timestamp | date}}</p>
       </div>
     </div>
   </div>

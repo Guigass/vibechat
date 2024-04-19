@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject, input } from '@angular/core';
 import { MessageModel } from '../../models/message.model';
 import { CommonModule } from '@angular/common';
 import { ChatRepository } from '../../repositories/chat/chat.repository';
@@ -13,17 +13,17 @@ import { XmppService } from '../../services/xmpp/xmpp.service';
   templateUrl: './message-bubble.component.html',
   styleUrls: ['./message-bubble.component.scss'],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [IonItem, CommonModule,AvatarComponent],
 })
 export class MessageBubbleComponent implements OnInit {
   private contactRepository = inject(ContactRepository);
-  @Input() message!: MessageModel;
-  @Input() user!: ContactModel | null | undefined;
+
+  message = input<MessageModel>();
+  user = input<ContactModel>();
 
   constructor() { }
 
-  ngOnInit(): void {
-
-  }
+  ngOnInit(): void { }
 
 }

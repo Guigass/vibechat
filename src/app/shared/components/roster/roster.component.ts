@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnIni
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
-import { IonContent, IonSearchbar, IonList } from "@ionic/angular/standalone";
+import { IonContent, IonSearchbar, IonList, IonItem, IonLabel } from "@ionic/angular/standalone";
 import { Subscription, map, take } from 'rxjs';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { SortPipe } from '../../pipes/sort/sort.pipe';
@@ -15,7 +15,7 @@ import { ContactGroupModel } from '../../models/contact-group.model';
   styleUrls: ['./roster.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonList,
+  imports: [IonLabel, IonItem, IonList,
     IonSearchbar,
     IonContent,
     CommonModule,

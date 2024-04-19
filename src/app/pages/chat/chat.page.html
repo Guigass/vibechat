@@ -10,8 +10,8 @@
 </ion-header>
 <ion-content (fileChange)="sendFile($event)" ngfDrop [(files)]="file">
   <cdk-virtual-scroll-viewport #virtualScroll itemSize="50" minBufferPx="900" maxBufferPx="1350">
-    <div *cdkVirtualFor="let msg of messages">
-      <app-message-bubble [user]="contact" [message]="msg"></app-message-bubble>
+    <div *cdkVirtualFor="let msg of messages()">
+      <app-message-bubble [user]="contact!" [message]="msg"></app-message-bubble>
     </div>
   </cdk-virtual-scroll-viewport>
 </ion-content>
