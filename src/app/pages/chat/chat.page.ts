@@ -1,7 +1,7 @@
 import { SharingService } from './../../shared/services/sharing/sharing.service';
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   IonButton,
   IonContent,
@@ -25,9 +25,11 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subject, Subscription, debounceTime } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
-import { ngfModule, ngf, ngfDrop } from 'angular-file';
+import { ngfModule } from 'angular-file';
+import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
+import { PageScrollService } from 'ngx-page-scroll-core';
 
 @Component({
   selector: 'app-chat',
@@ -52,30 +54,34 @@ import { ngfModule, ngf, ngfDrop } from 'angular-file';
     AvatarComponent,
     PickerComponent,
     ngfModule,
+    ScrollingModule
   ],
 })
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
-  mensages!: MessageModel[];
-  jid!: string;
+  @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
+  
+  //messages!: MessageModel[];
+  messages = signal<MessageModel[]>([]);
+
+  jid = signal('');
+  
   contact!: ContactModel | null;
 
   public file: any;
   public emoji: any;
   public showPreview = false;
   private lastUsedId: number = 1;
+  private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
   private sharingService = inject(SharingService);
+  private pageScrollService = inject(PageScrollService);
 
-  private typingSubject = new Subject<void>();
-  private isTyping = false;
-
+  messagesHistorySubscription!: Subscription;
   messagesSubscription!: Subscription;
-
-  private messag!: MessageModel;
 
   constructor() {
     addIcons({
@@ -90,38 +96,29 @@ export class ChatPage implements OnInit, OnDestroy {
   ngOnInit() {
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
-      this.jid = jidquery;
+      this.jid.set(jidquery);
     }
 
-    this.contactRepository.getContact(this.jid).subscribe((contact) => {
+    this.contactRepository.getContact(this.jid()).subscribe((contact) => {
       this.contact = contact!;
-      console.log(this.contact);
     });
 
-    this.typingSubject.pipe(debounceTime(1000)).subscribe((searchValue) => {
-      if (this.isTyping && this.contact) {
-        //this.chatRepository.sendTypingState(this.contact?.jid, false).subscribe();
-      }
+    this.messagesSubscription = this.chatRepository.getNewMessages(this.jid()).subscribe((message) => {
+      this.messages.update((values) => {
+        return [...values, message];
+      })
 
-      this.isTyping = false;
+      this.chatScroll();
     });
 
-    this.chatRepository.loadMessagesFromServer(this.jid, 10);
+    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid(), 100).subscribe((messages) => {
+      this.messages.set(messages);
 
-    // this.messagesSubscription = this.chatRepository.messages.pipe(
-    //   filter((message) => message != null),
-    //   filter((message) => message?.from === this.contact?.jid || message?.to === this.contact?.jid)
-    // ).subscribe((message) => {
-    //   console.log('message', message);
-    //   this.mensages.push(message!);
-    // });
+      this.chatScroll();
+    });
+  }
 
-    // this.chatRepository.getSetMessagesAsRead(this.jid).pipe(take(1))
-    // .subscribe((messages) => {
-    //   this.mensages = messages;
-    // });
-
-    // this.chatRepository.requestMessagesHistory(this.jid, 10, '');
+  getMessageHistory() {
   }
 
   sendMessage(msg: any) {
@@ -129,29 +126,18 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    //this.chatRepository.sendMessage(msg.value, this.jid).subscribe(() => {
-    //  msg.value = '';
-    //  msg.setFocus();
-    //});
-  }
+    this.chatRepository.sendMessage(msg.value, this.jid()).subscribe(() => {
+      msg.value = '';
+      msg.setFocus();
 
-  typing(event: any) {
-    if (!this.isTyping && this.contact) {
-      //this.chatRepository.sendTypingState(this.contact?.jid, true).subscribe();
-    }
-
-    this.isTyping = true;
-    this.typingSubject.next();
-  }
-
-  ngOnDestroy(): void {
-    this.typingSubject.complete();
-    this.messagesSubscription?.unsubscribe();
+      this.chatScroll();
+    });
   }
 
   addEmoji(evnt: any) {
     this.txtaMsg.value += evnt.emoji.native;
   }
+
   sendFile(evt: any) {
 
     this.file = evt;
@@ -172,5 +158,19 @@ export class ChatPage implements OnInit, OnDestroy {
 
   openEmoji() {
     this.showPreview = this.showPreview ? false : true;
+  }
+
+  chatScroll(){
+    timer(250).subscribe(() => {
+      this.viewport.scrollTo({
+        bottom: 0,
+        behavior: 'smooth',
+      });
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.messagesHistorySubscription?.unsubscribe();
+    this.messagesSubscription?.unsubscribe();
   }
 }

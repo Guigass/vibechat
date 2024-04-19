@@ -1,4 +1,11 @@
   <ion-searchbar show-clear-button="always" placeholder="Pesquisar" [debounce]="1000" (ionInput)="search($event)"></ion-searchbar>
-  <div *ngFor="let rosterGroup of rosterList | sort:'asc':'name', let i = index; trackBy: trackBy">
-    <app-roster-group [rosterGroup]="rosterGroup" [index]="i" [open]="false" [search]="searchText"></app-roster-group>
+  <div>
+    @for(rosterGroup of rosterList | sort:'asc':'name'; let i = $index; track rosterGroup.name){
+      <app-roster-group [rosterGroup]="rosterGroup" [index]="i" [open]="false" [search]="searchText"></app-roster-group>
+    }
+    @empty {
+      <ion-item>
+        <ion-label>Nenhum contato encontrado</ion-label>
+      </ion-item>
+    }
   </div>

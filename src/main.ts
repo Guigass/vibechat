@@ -13,6 +13,8 @@ import * as CordovaSQLiteDriver from 'localforage-cordovasqlitedriver';
 import { Drivers } from '@ionic/storage';
 import { IonicStorageModule } from '@ionic/storage-angular';
 
+import { NgxPageScrollCoreModule } from 'ngx-page-scroll-core';
+
 if (environment.production) {
   enableProdMode();
 }
@@ -30,6 +32,7 @@ bootstrapApplication(AppComponent, {
         version: 1,
         driverOrder: [CordovaSQLiteDriver._driver, Drivers.IndexedDB, Drivers.LocalStorage]
       })
-    )
+    ),
+    importProvidersFrom(NgxPageScrollCoreModule)
   ],
 });
