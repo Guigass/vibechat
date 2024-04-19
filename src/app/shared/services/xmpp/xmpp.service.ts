@@ -14,7 +14,7 @@ export class XmppService {
 
   private xmpp!: Client;
 
-  private onStanza = new ReplaySubject<any>();
+  private onStanza = new Subject<any>();
   get onStanza$() {
     return this.onStanza.asObservable();
   }
@@ -58,7 +58,7 @@ export class XmppService {
     this.xmpp.on('online', (address) => {
       this.isConnected = true;
 
-      this.xmpp.send(xml("presence", {}, xml("status", {}, PresenceType.Online)));
+      //this.xmpp.send(xml("presence", {}, xml("status", {}, PresenceType.Online)));
 
       this.onOnline.next(address);
     });

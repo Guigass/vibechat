@@ -6,6 +6,7 @@ import { IonItem } from "@ionic/angular/standalone";
 import { AvatarComponent } from '../avatar/avatar.component';
 import { ContactModel } from '../../models/contact.model';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
+import { XmppService } from '../../services/xmpp/xmpp.service';
 
 @Component({
   selector: 'app-message-bubble',
@@ -17,19 +18,12 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
 export class MessageBubbleComponent implements OnInit {
   private contactRepository = inject(ContactRepository);
   @Input() message!: MessageModel;
-  @Input() user!:ContactModel | null | undefined;
-
-  public contact: any;
+  @Input() user!: ContactModel | null | undefined;
 
   constructor() { }
 
   ngOnInit(): void {
-    console.log(this.message)
 
-      console.log(this.user)
-    this.contactRepository.getContact(this.user?.jid ?? '').subscribe((contact) => {
-      this.contact = contact;
-    });
-  };
+  }
 
 }

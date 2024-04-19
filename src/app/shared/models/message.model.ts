@@ -1,22 +1,21 @@
 import { ContentHelper } from "../helpers/content.helper";
 
 export class MessageModel {
+    id?: number;
     from: string;
     to: string;
     body: string;
     timestamp: Date;
-    id: string;
-    type: 'received' | 'sent';
+    serverId: string;
     ticked?: boolean;
     read?: boolean;
     
-    constructor(from: string, to: string, body: string, timestamp: Date, messageId: string, type: 'received' | 'sent', ticked?: boolean, read?: boolean) {
+    constructor(from: string, to: string, body: string, timestamp: Date, serverId: string, ticked?: boolean, read?: boolean) {
         this.from = from;
         this.to = to;
         this.body = body;
         this.timestamp = timestamp;
-        this.id = messageId;
-        this.type = type;
+        this.serverId = serverId;
         this.ticked = ticked;
         this.read = read;
     }

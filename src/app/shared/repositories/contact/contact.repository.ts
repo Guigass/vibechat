@@ -30,8 +30,11 @@ export class ContactRepository {
   private init() {
     this.ngZone.runOutsideAngular(() => {
       this.updateUsersInfo().subscribe();
-      this.setAllOfline().subscribe(() => {
-        this.watchForPresenceUpdates();
+
+      this.setAllOffline().subscribe(() => {
+        this.presenceService.sendPresence(PresenceType.Online).subscribe(() => {
+          this.watchForPresenceUpdates();
+        });
       })
     });
   }
@@ -94,7 +97,6 @@ export class ContactRepository {
     const umaSemanaAtras = new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000);
 
     return this.rosterRepository.rosterList.pipe(
-      take(1),
       concatMap(contacts => from(contacts)),
       concatMap(contact =>
         from(this.db.contactsInfo.where('jid').equals(contact.jid).first()).pipe(
@@ -129,10 +131,12 @@ export class ContactRepository {
     );
   }
 
-  private setAllOfline() {
+  private setAllOffline() {
     return from(this.db.presences.toArray()).pipe(
       switchMap(presences => {
-        return from(Promise.all(presences.map(presence => this.db.presences.update(presence.id!, { status: 'offline', show: 'offline' }))));
+        return from(Promise.all(
+          presences.map(presence => this.db.presences.update(presence.id!, { status: 'offline', show: 'offline', type: PresenceType.Offline}))
+        ));
       })
     );
   }
@@ -140,7 +144,7 @@ export class ContactRepository {
   private watchForPresenceUpdates() {
     this.ngZone.runOutsideAngular(() => {
       this.presenceService.getPresences().pipe(
-        switchMap(presence => {
+        concatMap(presence => {
           return from(this.db.presences.where('jid').equals(presence.jid).first()).pipe(
             switchMap(presenceData => {
               return presenceData ?
