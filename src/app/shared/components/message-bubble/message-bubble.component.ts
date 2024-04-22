@@ -20,7 +20,7 @@ export class MessageBubbleComponent implements OnInit {
   private contactRepository = inject(ContactRepository);
 
   message = input<MessageModel>();
-  user = input<ContactModel>();
+  contact = input<ContactModel>();
 
   constructor() { }
 

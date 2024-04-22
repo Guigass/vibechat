@@ -1,5 +1,5 @@
-import { Injectable, inject } from '@angular/core';
-import { BehaviorSubject, NEVER, Observable, catchError, of, switchMap } from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
+import { BehaviorSubject, NEVER, Observable, catchError, of, switchMap, tap } from 'rxjs';
 import { XmppService } from '../xmpp/xmpp.service';
 import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enum';
@@ -13,16 +13,17 @@ import { DatabaseService } from '../database/database.service';
 export class AuthService {
   private xmppService = inject(XmppService);
   private webStorageService = inject(WebStorageService);
-  private db = inject(DatabaseService);
 
   private preferenceKey = PreferencesKey.UserCredentials;
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
+
+  public jid = signal('');
 
   constructor() {}
 
   login(userCredentials: LoginModel): Observable<boolean> {
     return this.xmppService.connect(`wss://${userCredentials.server}:5443/ws`, userCredentials.server, `${userCredentials.username}`, userCredentials.password).pipe(
-      switchMap(() => {
+      switchMap((logged) => {
         this.webStorageService.setItem(this.preferenceKey, userCredentials, StorageType.Session, true);
 
         if (userCredentials.rememberMe) {
@@ -32,8 +33,8 @@ export class AuthService {
           this.webStorageService.removeItem(this.preferenceKey, StorageType.Local);
         }
         
+        this.jid.set(`${logged.local}@${logged.domain}`);
         this.isAuthenticatedSubject.next(true);
-        this.db.setUserPrefix(userCredentials.username);
         return of(true);
       }),
       catchError(error => {
@@ -62,7 +63,6 @@ export class AuthService {
   logout(): void {
     this.xmppService.disconnect();
     this.webStorageService.removeItem(this.preferenceKey, StorageType.Session);
-    this.db.setUserPrefix();
     this.isAuthenticatedSubject.next(false);
   }
 

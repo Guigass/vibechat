@@ -1,0 +1,6 @@
+<button (click)="loadMore()">More</button>
+<div>
+    @for(msg of messagesList(); track msg.id){
+        <app-message-bubble [message]="msg" [contact]="contact()"></app-message-bubble>
+    }
+</div>

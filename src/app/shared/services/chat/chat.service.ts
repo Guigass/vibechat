@@ -4,6 +4,7 @@ import { XmppService } from '../xmpp/xmpp.service';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable, catchError, defer, distinctUntilChanged, filter, map, max, of, share, startWith, switchMap, takeUntil, tap, throwError, timer } from 'rxjs';
 import { MessageModel } from '../../models/message.model';
+import { RequestMessageFilter } from '../../models/request-message-filter';
 
 @Injectable({
   providedIn: 'root'
@@ -28,8 +29,14 @@ export class ChatService {
           return throwError(() => new Error('Falha ao enviar mensagem'));
         }),
         map(() => {
-          const msg = new MessageModel(this.xmppService.jid, to, body, new Date(), id);
-          msg.read = true;
+          const msg = new MessageModel({
+            from: this.xmppService.jid,
+            to: to,
+            body: body,
+            timestamp: new Date(),
+            serverId: id,
+          });
+
           return msg;
         })
       );
@@ -51,7 +58,14 @@ export class ChatService {
 
         this.sendReceipt(from, messageId).subscribe();
 
-        return new MessageModel(from, to, body, timestamp, messageId, true, false);
+        return new MessageModel({
+          from: from,
+          to: to,
+          body: body,
+          timestamp: timestamp,
+          serverId: messageId,
+          ticked: true,
+        });
       }));
   }
 
@@ -98,7 +112,13 @@ export class ChatService {
 
         this.sendReceipt(stanza.attrs.from, messageId).subscribe();
 
-        return new MessageModel(from, stanza.attrs.to, body, timestamp, messageId);
+        return new MessageModel({
+          from: from,
+          to: stanza.attrs.to,
+          body: body,
+          timestamp: timestamp,
+          serverId: messageId,
+        });
       }));
   }
 
@@ -121,7 +141,7 @@ export class ChatService {
       distinctUntilChanged());
   }
 
-  requestMessagesHistory(id: string, from: string, maxMessages?: number, before?: string, startDate?: string, endDate?: string): Observable<any> {
+  requestMessagesHistory(id: string, filter: RequestMessageFilter): Observable<any> {
     const mamQuery = xml(
       'iq',
       { type: 'set', id: id },
@@ -130,26 +150,33 @@ export class ChatService {
           xml('field', { var: 'FORM_TYPE', type: 'hidden' },
             xml('value', {}, 'urn:xmpp:mam:2')
           ),
+          // xml('field', { var: 'include-groupchat'},
+          //   xml('value', {}, 'false')
+          // ),
           xml('field', { var: 'with' },
-            xml('value', {}, from)
+            xml('value', {}, filter.with)
           ),
-          startDate ?
-            xml('field ', { var: 'start' },
-              xml('value', {}, startDate)
+          filter.start ?
+            xml('field', { var: 'start' },
+              xml('value', {}, filter.start.toISOString())
             ) : '',
-          endDate ?
-            xml('field ', { var: 'end' },
-              xml('value', {}, endDate)
+            filter.end ?
+            xml('field', { var: 'end' },
+              xml('value', {}, filter.end.toISOString())
             ) : '',
-          before ? xml('field', { var: 'before' }, 
-              xml('value', {}, before)
+          filter.afterId ?
+            xml('field', { var: 'after-id' },
+              xml('value', {}, filter.afterId.toString())
+            ) : '',
+            filter.beforeId ?
+            xml('field', { var: 'before-id' },
+              xml('value', {}, filter.beforeId.toString())
             ) : '',
         ),
-        maxMessages ?
-          xml('set', { xmlns: 'http://jabber.org/protocol/rsm' },
-            maxMessages ? xml('max', {}, maxMessages.toString()) : '',
-          ) : '',
-        xml('flip-page', {}, '')
+        xml('set', { xmlns: 'http://jabber.org/protocol/rsm' },
+          filter.max ? xml('max', {}, 'filter.max') : '',
+          xml('before', {}, ''),
+        )
       )
     );
 
@@ -180,8 +207,18 @@ export class ChatService {
         const timestamp = new Date(delay.attrs.stamp);
         const body = message.getChildText('body');
         const messageId = message.attrs.id;
+        const resultId = result.attrs.id;
 
-        return new MessageModel(from, message.attrs.to, body, timestamp, messageId);
+        console.log('messageId', messageId);
+
+        return new MessageModel({
+          from: from,
+          to: message.attrs.to,
+          body: body,
+          timestamp: timestamp,
+          serverId: messageId ?? resultId,
+          resultId: resultId,
+        });
       }),
     );
   }
@@ -200,6 +237,12 @@ export class ChatService {
         };
       }),
     );
+  }
+
+  getMessagesHistoryMetadata(): Observable<any> {
+    const iq = xml('iq', { type: 'get' }, xml('metadata', {xmlns: 'urn:xmpp:mam:2'}));
+
+    return this.xmppService.sendIq(iq);
   }
 
   sendReceipt(to: string, id: string): Observable<any> {

@@ -32,7 +32,8 @@ export class ContactRepository {
       this.updateUsersInfo().subscribe();
 
       this.setAllOffline().subscribe(() => {
-        this.presenceService.sendPresence(PresenceType.Online).subscribe(() => {
+        this.presenceService.sendPresence(PresenceType.Online)
+        .pipe(debounceTime(1000)).subscribe(() => {
           this.watchForPresenceUpdates();
         });
       })

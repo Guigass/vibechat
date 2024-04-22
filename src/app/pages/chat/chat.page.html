@@ -1,19 +1,18 @@
 <ion-header>
   <ion-toolbar>
-    <ion-item>
-      <app-avatar *ngIf="contact" [user]="contact"></app-avatar>
-      <ion-title>
-        {{contact?.name}}
+    <ion-item *ngIf="contact()">
+      <app-avatar [user]="contact()"></app-avatar>
+      <ion-title *ngIf="!contactInfo()">
+        {{contact()?.name}}
+      </ion-title>
+      <ion-title *ngIf="contactInfo()">
+        {{contactInfo()?.nickname}}
       </ion-title>
     </ion-item>
   </ion-toolbar>
 </ion-header>
 <ion-content (fileChange)="sendFile($event)" ngfDrop [(files)]="file">
-  <cdk-virtual-scroll-viewport #virtualScroll itemSize="50" minBufferPx="900" maxBufferPx="1350">
-    <div *cdkVirtualFor="let msg of messages()">
-      <app-message-bubble [user]="contact!" [message]="msg"></app-message-bubble>
-    </div>
-  </cdk-virtual-scroll-viewport>
+  <app-chat *ngIf="contact() && contactInfo()" [contact]="contact()" [contactInfo]="contactInfo()"></app-chat>
 </ion-content>
 <ion-footer class="endChatPage">
   <ion-item class="container">
@@ -27,7 +26,7 @@
     <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon>
     </ion-item>
   </ion-item>
-  <div *ngIf="showPreview">
+  <div *ngIf="showEmoji">
     <emoji-mart [style]="{ position: 'absolute', bottom: '60px', left: '0px' }" (emojiClick)="addEmoji($event)"
       [i18n]="{ search: 'Recherche', categories: { search: 'Recentes', recent: 'Recentes' } }"></emoji-mart>
   </div>

@@ -7,9 +7,11 @@ import { ContactGroupModel } from '../../models/contact-group.model';
 import { RosterContactItemComponent } from '../../components/roster-contact-item/roster-contact-item.component';
 import { IonAccordionGroup, IonAccordion, IonLabel, IonItem, IonList } from "@ionic/angular/standalone";
 import { ContactModel } from '../../models/contact.model';
-import { BehaviorSubject, map, distinctUntilChanged, from, switchMap, catchError, of, tap, concatMap, filter } from 'rxjs';
+import { BehaviorSubject, map, distinctUntilChanged, from, switchMap, catchError, of, tap, concatMap, filter, timer } from 'rxjs';
 import { PresenceType } from '../../enums/presence-type.enum';
 import { PresenceModel } from '../../models/presence.model';
+import { SortOnlinePipe } from '../../pipes/sort-online/sort-online.pipe';
+import { time } from 'ionicons/icons';
 
 @Component({
   selector: 'app-roster-group',
@@ -17,9 +19,10 @@ import { PresenceModel } from '../../models/presence.model';
   styleUrls: ['./roster-group.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent],
+  imports: [IonList, IonItem, IonLabel, IonAccordion, IonAccordionGroup, CommonModule, RosterContactItemComponent, SortOnlinePipe],
 })
 export class RosterGroupComponent implements OnInit, OnChanges {
+
   @Input() rosterGroup?: ContactGroupModel;
   @Input() index?: number;
   @Input() open?: boolean = false;
@@ -27,67 +30,44 @@ export class RosterGroupComponent implements OnInit, OnChanges {
 
   private contactRepository = inject(ContactRepository);
   private presenceService = inject(PresenceService);
+  private cdr = inject(ChangeDetectorRef);
 
-  private contactPresences: Map<string, PresenceModel | undefined> = new Map();
+  contactPresences: Map<string, PresenceModel | undefined> = new Map();
 
   isSearching: boolean = false;
   groupHidden: boolean = false;
 
 
   ngOnInit(): void {
-    this.initializeAndWatchPresences();
+    timer(1000).subscribe(() => {
+      this.initializeAndWatchPresences();
+    });
   }
 
   initializeAndWatchPresences() {
     if (!this.rosterGroup?.contacts) {
       return;
     }
-  
+
     // Carrega as presenças iniciais
     from(this.rosterGroup.contacts).pipe(
-      concatMap(contact => 
+      concatMap(contact =>
         this.contactRepository.getContactPresence(contact.jid).pipe(
-          catchError(() => of({ jid: contact.jid, type: PresenceType.Offline })), 
+          catchError(() => of({ jid: contact.jid, type: PresenceType.Offline })),
           tap(presence => this.contactPresences.set(contact.jid, presence))
         )
       ),
     ).subscribe(() => {
-      this.sortContacts();
+      this.cdr.markForCheck();
     });
 
     this.presenceService.getPresences().pipe(
       filter(presence => presence && this.rosterGroup?.contacts.some(s => s.jid === presence.jid) ? true : false),
       tap(presence => this.contactPresences.set(presence.jid, presence))
     ).subscribe(() => {
-      this.sortContacts();
-    })
-  }
-
-  sortContacts() {
-    const sortedContacts = this.rosterGroup!.contacts.slice().sort((a, b) => {
-
-        const aPresence = this.contactPresences.get(a.jid)?.type || PresenceType.Offline;
-        const bPresence = this.contactPresences.get(b.jid)?.type || PresenceType.Offline;
-        
-        const presenceComparison = this.getPresenceWeight(aPresence) - this.getPresenceWeight(bPresence);
-        if (presenceComparison !== 0) {
-            return presenceComparison;
-        }
-        
-        return a.jid.localeCompare(b.jid);
+      this.cdr.markForCheck();
     });
-
-    this.rosterGroup!.contacts = sortedContacts;
-}
-
-getPresenceWeight(presenceType: string): number {
-    switch (presenceType) {
-        case PresenceType.Online: return 1;
-        case PresenceType.Away: return 2;
-        case PresenceType.DND: return 3;
-        default: return 4;
-    }
-}
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['search']) {
@@ -95,9 +75,9 @@ getPresenceWeight(presenceType: string): number {
 
         const searchResult = this.rosterGroup?.contacts.filter(contact => contact.name.toLowerCase().includes(changes['search'].currentValue.toLowerCase()));
         this.open = searchResult && searchResult.length > 0;
-  
+
         this.isSearching = true;
-  
+
         this.rosterGroup?.contacts.forEach(contact => {
           if (searchResult?.findIndex(search => search.jid === contact.jid) === -1) {
             contact.hidden = true;
@@ -105,13 +85,13 @@ getPresenceWeight(presenceType: string): number {
             contact.hidden = false;
           }
         });
-  
+
         this.groupHidden = this.rosterGroup?.contacts.filter(contact => contact.hidden === false).length === 0;
       } else {
         this.rosterGroup?.contacts.forEach(contact => {
           contact.hidden = false;
         });
-  
+
         this.groupHidden = false;
         this.open = false;
         this.isSearching = false;
