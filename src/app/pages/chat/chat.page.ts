@@ -1,6 +1,6 @@
 import { SharingService } from './../../shared/services/sharing/sharing.service';
 import { ContactRepository } from './../../shared/repositories/contact/contact.repository';
-import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, effect, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import {
   IonButton,
@@ -25,14 +25,18 @@ import { send, happyOutline, folderOutline } from 'ionicons/icons';
 import { ContactModel } from 'src/app/shared/models/contact.model';
 import { AvatarComponent } from 'src/app/shared/components/avatar/avatar.component';
 import { ChatRepository } from 'src/app/shared/repositories/chat/chat.repository';
-import { Subscription, timer } from 'rxjs';
+import { Subscription, mergeMap, timer } from 'rxjs';
 import { PickerComponent } from '@ctrl/ngx-emoji-mart';
 import { ngfModule } from 'angular-file';
 import { CdkVirtualScrollViewport, ScrollingModule } from '@angular/cdk/scrolling';
-import { PageScrollService } from 'ngx-page-scroll-core';
+import { v4 as uuidv4 } from 'uuid';
+import { SortPipe } from 'src/app/shared/pipes/sort/sort.pipe';
+import { VCardModel } from 'src/app/shared/models/vcard.model';
+import { ChatComponent } from 'src/app/shared/components/chat/chat.component';
+
 
 @Component({
-  selector: 'app-chat',
+  selector: 'app-chat-page',
   templateUrl: './chat.page.html',
   styleUrls: ['./chat.page.scss'],
   standalone: true,
@@ -54,40 +58,36 @@ import { PageScrollService } from 'ngx-page-scroll-core';
     AvatarComponent,
     PickerComponent,
     ngfModule,
-    ScrollingModule
+    ChatComponent
   ],
 })
-export class ChatPage implements OnInit, OnDestroy {
+export class ChatPage implements OnInit {
+  private route = inject(ActivatedRoute);
+  private navCtrl = inject(NavController);
+  private contactRepository = inject(ContactRepository);
+  private chatRepository = inject(ChatRepository);
+  private sharingService = inject(SharingService);
+
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
   @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
 
-  messages = signal<MessageModel[]>([]);
-
   jid = signal('');
+  contact = signal<ContactModel | undefined>(undefined);
+  contactInfo = signal<VCardModel | undefined>(undefined);
 
-  contact!: ContactModel | null;
-
-  public file: any;
-  public emoji: any;
-  public showPreview = false;
-  private lastUsedId: number = 1;
-  private route = inject(ActivatedRoute);
-  private navCtrl = inject(NavController);
-  private chatRepository = inject(ChatRepository);
-  private contactRepository = inject(ContactRepository);
-  private sharingService = inject(SharingService);
-
-  messagesHistorySubscription!: Subscription;
-  messagesSubscription!: Subscription;
+  file: any;
+  emoji: any;
+  showEmoji = false;
 
   constructor() {
+    this.navCtrl.setDirection('root');
+
     addIcons({
       send,
       happyOutline,
       folderOutline,
     });
 
-    this.navCtrl.setDirection('root');
   }
 
   ngOnInit() {
@@ -96,34 +96,16 @@ export class ChatPage implements OnInit, OnDestroy {
       this.jid.set(jidquery);
     }
 
-    this.contactRepository.getContact(this.jid()).subscribe((contact) => {
-      this.contact = contact!;
-    });
+    this.contactRepository.getContact(this.jid()).pipe(
+      mergeMap((contact) => {
+        this.contact.set(contact);
 
-    this.messagesSubscription = this.chatRepository.getNewMessages(this.jid()).subscribe((message) => {
-      this.messages.update((values) => {
-        return [...values, message];
+        return this.contactRepository.getContactInfo(this.jid())
       })
-
-      this.chatScroll();
+    )
+    .subscribe((contactInfo) => {
+      this.contactInfo.set(contactInfo);
     });
-
-    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid(), 10).subscribe((messages) => {
-      console.log('Messages', messages);
-      // this.messages.set(messages);
-
-      //this.chatScroll();
-    }, (err) => {
-      console.log('Error', err);
-
-    }, () => {
-
-
-    });
-  }
-
-  getMessageHistory() {
-
   }
 
   sendMessage(msg: any) {
@@ -134,8 +116,6 @@ export class ChatPage implements OnInit, OnDestroy {
     this.chatRepository.sendMessage(msg.value, this.jid()).subscribe(() => {
       msg.value = '';
       msg.setFocus();
-
-      this.chatScroll();
     });
   }
 
@@ -146,38 +126,18 @@ export class ChatPage implements OnInit, OnDestroy {
   sendFile(evt: any) {
 
     this.file = evt;
-    let id = this.lastUsedId;
-    this.lastUsedId++;
-
-    this.txtaMsg.value += this.file.name;
 
     if (this.file && !this.file.id) {
-      this.file.id = id;
-
       this.sharingService
-        .shareFile(this.file, this.lastUsedId.toString())
-      .subscribe((resp) => {
-            console.log(resp)
+        .shareFile(this.file, uuidv4())
+        .subscribe((resp) => {
+          console.log('Ola', resp);
         });
 
     }
   }
 
   openEmoji() {
-    this.showPreview = this.showPreview ? false : true;
-  }
-
-  chatScroll(){
-    timer(250).subscribe(() => {
-      this.viewport.scrollTo({
-        bottom: 0,
-        behavior: 'smooth',
-      });
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.messagesHistorySubscription?.unsubscribe();
-    this.messagesSubscription?.unsubscribe();
+    this.showEmoji = this.showEmoji ? false : true;
   }
 }

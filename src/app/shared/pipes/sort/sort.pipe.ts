@@ -4,32 +4,38 @@ export type SortOrder = 'asc' | 'desc';
 
 @Pipe({
   name: 'sort',
-  standalone: true
+  standalone: true,
+  pure: false
 })
 export class SortPipe implements PipeTransform {
-  transform(value: any[], sortOrder: SortOrder | string = 'asc', sortKey?: string): any {
-    sortOrder = sortOrder && (sortOrder.toLowerCase() as any);
+  transform(value: any[], sortOrder: SortOrder = 'asc', sortKey?: string): any {
+    sortOrder = sortOrder.toLowerCase() as SortOrder;
 
     if (!value || (sortOrder !== 'asc' && sortOrder !== 'desc')) return value;
 
-    let numberArray = [];
-    let stringArray = [];
+    let sortedArray: any[] = [];
 
     if (!sortKey) {
-      numberArray = value.filter(item => typeof item === 'number').sort();
-      stringArray = value.filter(item => typeof item === 'string').sort();
+      sortedArray = value.sort();
     } else {
-      numberArray = value.filter(item => typeof item[sortKey] === 'number').sort((a, b) => a[sortKey] - b[sortKey]);
-      stringArray = value
-        .filter(item => typeof item[sortKey] === 'string')
-        .sort((a, b) => {
-          if (a[sortKey] < b[sortKey]) return -1;
-          else if (a[sortKey] > b[sortKey]) return 1;
-          else return 0;
-        });
-    }
-    const sorted = numberArray.concat(stringArray);
-    return sortOrder === 'asc' ? sorted : sorted.reverse();
-  }
+      // Classificar por sortKey, verificando se é número, string ou data
+      sortedArray = value.slice().sort((a, b) => {
+        const aValue = a[sortKey];
+        const bValue = b[sortKey];
 
+        if (aValue instanceof Date && bValue instanceof Date) {
+          return aValue.getTime() - bValue.getTime();
+        } else if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return aValue - bValue;
+        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+          return aValue.localeCompare(bValue);
+        } else {
+          // Fallback para caso os tipos não sejam previstos
+          return 0;
+        }
+      });
+    }
+
+    return sortOrder === 'asc' ? sortedArray : sortedArray.reverse();
+  }
 }

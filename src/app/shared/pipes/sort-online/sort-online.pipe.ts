@@ -1,22 +1,41 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { ContactModel } from '../../models/contact.model';
+import { PresenceModel } from '../../models/presence.model';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Pipe({
   name: 'sortOnline',
-  standalone: true
+  standalone: true,
+  pure: false
 })
 export class SortOnlinePipe implements PipeTransform {
 
-  transform(value: ContactModel[]): any {
+  transform(value: ContactModel[], presenceMap: Map<string, PresenceModel | undefined>): any {
     if (!value) return value;
 
-    const online = value.filter(contact => contact.presence?.type?.toLocaleLowerCase() === 'online');
-    const other = value.filter(contact => contact.presence?.type && contact.presence?.type?.toLocaleLowerCase() !== 'online' && contact.presence?.type?.toLocaleLowerCase() !== 'offline');
-    const offline = value.filter(contact => contact.presence?.type?.toLocaleLowerCase() === 'offline' || !contact.presence?.type || contact.presence?.type?.toLocaleLowerCase() === 'unavailable');
+    const sortedContacts = value.slice().sort((a, b) => {
 
-    const list = online.concat(other).concat(offline);
+      const aPresence = presenceMap.get(a.jid)?.type || PresenceType.Offline;
+      const bPresence = presenceMap.get(b.jid)?.type || PresenceType.Offline;
 
-    return list;
+      const presenceComparison = this.getPresenceWeight(aPresence) - this.getPresenceWeight(bPresence);
+      if (presenceComparison !== 0) {
+        return presenceComparison;
+      }
+
+      return a.jid.localeCompare(b.jid);
+    });
+
+    return sortedContacts
+  }
+
+  getPresenceWeight(presenceType: string): number {
+    switch (presenceType) {
+      case PresenceType.Online: return 1;
+      case PresenceType.Away: return 2;
+      case PresenceType.DND: return 3;
+      default: return 4;
+    }
   }
 
 }

@@ -41,7 +41,6 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
 
   contactInfo!: VCardModel;
 
-
   unreadMessages = 0;
   lastMessage!: MessageModel | null;
 

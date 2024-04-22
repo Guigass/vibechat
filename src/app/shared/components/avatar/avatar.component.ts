@@ -8,6 +8,7 @@ import { ContactRepository } from '../../repositories/contact/contact.repository
 import { Subscription, filter, tap } from 'rxjs';
 import { PresenceModel } from '../../models/presence.model';
 import { VCardModel } from '../../models/vcard.model';
+import { PresenceType } from '../../enums/presence-type.enum';
 
 @Component({
   selector: 'app-avatar',
@@ -30,14 +31,14 @@ export class AvatarComponent implements AfterViewInit, OnDestroy {
 
   @Input() user: ContactModel | null | undefined;
 
-  presence!: PresenceModel;
+  presence: PresenceModel = { jid: '', type: PresenceType.Offline };
   contactInfo!: VCardModel;
 
   ngAfterViewInit(): void {
     if (!this.user) {
       return;
     }
-
+    
     this.persenceSubscription = this.contactRepository.getContactPresenceChanges(this.user?.jid!).pipe(
       filter(presence => presence !== undefined),
       filter(presence => presence !== null && this.user !== null && presence!.jid === this.user?.jid)
