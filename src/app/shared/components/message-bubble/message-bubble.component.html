@@ -1,5 +1,5 @@
-
-<div id="chat-container">
+<!--
+<div id="chat-container"> -->
     <div class="content" *ngIf="user()?.jid === message()!.to">
       <app-avatar [user]="user()"></app-avatar>
       <div class="bubble">
@@ -24,5 +24,5 @@
         <p>{{message()!.timestamp | date}}</p>
       </div>
     </div>
-  </div>
+  <!-- </div> -->
 

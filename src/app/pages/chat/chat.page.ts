@@ -60,12 +60,12 @@ import { PageScrollService } from 'ngx-page-scroll-core';
 export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
   @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
-  
+
   //messages!: MessageModel[];
   messages = signal<MessageModel[]>([]);
 
   jid = signal('');
-  
+
   contact!: ContactModel | null;
 
   public file: any;
@@ -144,13 +144,15 @@ export class ChatPage implements OnInit, OnDestroy {
     let id = this.lastUsedId;
     this.lastUsedId++;
 
+    this.txtaMsg.value += this.file.name;
+
     if (this.file && !this.file.id) {
       this.file.id = id;
 
       this.sharingService
         .shareFile(this.file, this.lastUsedId.toString())
-        .subscribe((resp) => {
-          console.log('Ola', resp);
+      .subscribe((resp) => {
+            console.log(resp)
         });
 
     }
