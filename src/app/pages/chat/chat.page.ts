@@ -61,7 +61,6 @@ export class ChatPage implements OnInit, OnDestroy {
   @ViewChild('txtaMsg') txtaMsg!: IonTextarea;
   @ViewChild('virtualScroll') viewport!: CdkVirtualScrollViewport;
 
-  //messages!: MessageModel[];
   messages = signal<MessageModel[]>([]);
 
   jid = signal('');
@@ -72,13 +71,11 @@ export class ChatPage implements OnInit, OnDestroy {
   public emoji: any;
   public showPreview = false;
   private lastUsedId: number = 1;
-  private cdr = inject(ChangeDetectorRef);
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private chatRepository = inject(ChatRepository);
   private contactRepository = inject(ContactRepository);
   private sharingService = inject(SharingService);
-  private pageScrollService = inject(PageScrollService);
 
   messagesHistorySubscription!: Subscription;
   messagesSubscription!: Subscription;
@@ -111,14 +108,22 @@ export class ChatPage implements OnInit, OnDestroy {
       this.chatScroll();
     });
 
-    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid(), 100).subscribe((messages) => {
-      this.messages.set(messages);
+    this.messagesHistorySubscription = this.chatRepository.loadMessages(this.jid(), 10).subscribe((messages) => {
+      console.log('Messages', messages);
+      // this.messages.set(messages);
 
-      this.chatScroll();
+      //this.chatScroll();
+    }, (err) => {
+      console.log('Error', err);
+
+    }, () => {
+
+
     });
   }
 
   getMessageHistory() {
+
   }
 
   sendMessage(msg: any) {

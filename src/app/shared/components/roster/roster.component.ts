@@ -1,5 +1,5 @@
 import { RosterRepository } from 'src/app/shared/repositories/roster/roster.repository';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input, signal } from '@angular/core';
 import { RosterService } from '../../services/roster/roster.service';
 import { CommonModule } from '@angular/common';
 import { RosterGroupComponent } from '../roster-group/roster-group.component';
@@ -33,9 +33,9 @@ export class RosterComponent implements OnInit, OnDestroy {
 
   rosterSubscription!: Subscription;
 
-  rosterList: ContactGroupModel[] = [];
+  rosterList = signal<ContactGroupModel[]>([]);
 
-  searchText: string = '';
+  searchText = signal<string>('');
 
   constructor() { }
 
@@ -62,8 +62,7 @@ export class RosterComponent implements OnInit, OnDestroy {
       })
     )
     .subscribe((roster) => {
-      this.rosterList = roster;
-      this.cdr.markForCheck();
+      this.rosterList.set(roster);
     });
   }
 
@@ -72,10 +71,6 @@ export class RosterComponent implements OnInit, OnDestroy {
   }
 
   search(evt: any){
-    this.searchText = evt.detail.value;
-  }
-
-  trackBy(index: number, item: ContactGroupModel) {
-    return item.name;
+    this.searchText.set(evt.detail.value);
   }
 }

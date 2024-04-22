@@ -1,7 +1,7 @@
   <ion-searchbar show-clear-button="always" placeholder="Pesquisar" [debounce]="1000" (ionInput)="search($event)"></ion-searchbar>
   <div>
-    @for(rosterGroup of rosterList | sort:'asc':'name'; let i = $index; track rosterGroup.name){
-      <app-roster-group [rosterGroup]="rosterGroup" [index]="i" [open]="false" [search]="searchText"></app-roster-group>
+    @for(rosterGroup of rosterList() | sort:'asc':'name'; let i = $index; track rosterGroup.name){
+      <app-roster-group [rosterGroup]="rosterGroup" [index]="i" [open]="false" [search]="searchText()"></app-roster-group>
     }
     @empty {
       <ion-item>
