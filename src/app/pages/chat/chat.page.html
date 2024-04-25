@@ -11,8 +11,8 @@
     </ion-item>
   </ion-toolbar>
 </ion-header>
-<ion-content (fileChange)="sendFile($event)" ngfDrop [(files)]="file">
-  <app-chat *ngIf="contact() && contactInfo()" [contact]="contact()" [contactInfo]="contactInfo()"></app-chat>
+<ion-content (fileChange)="sendFile($event)" ngfDrop [(files)]="file" >
+  <app-chat  *ngIf="contact() && contactInfo()" [contact]="contact()" [contactInfo]="contactInfo()"></app-chat>
 </ion-content>
 <ion-footer class="endChatPage">
   <ion-item class="container">

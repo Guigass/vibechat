@@ -1,6 +1,11 @@
 <button (click)="loadMore()">More</button>
 <div>
     @for(msg of messagesList(); track msg.id){
-        <app-message-bubble [message]="msg" [contact]="contact()"></app-message-bubble>
-    }
+        <app-message-bubble    [message]="msg" [contact]="contact()"></app-message-bubble>
+        <app-image-bubble     [contact]="contact()"></app-image-bubble>
+      }
+      <div>
+      </div>
 </div>
+*ngIf="msg.contentType === 'text'"
+*ngIf="msg.contentType === 'image'"

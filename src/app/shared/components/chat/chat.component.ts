@@ -8,6 +8,9 @@ import { ContactModel } from '../../models/contact.model';
 import { VCardModel } from '../../models/vcard.model';
 import { timer } from 'rxjs';
 import { MessageBubbleComponent } from '../message-bubble/message-bubble.component';
+import { ImageBubbleComponent } from '../image-bubble/image-bubble.component';
+import { AudioBubbleComponent } from '../audio-bubble/audio-bubble.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-chat',
@@ -15,7 +18,7 @@ import { MessageBubbleComponent } from '../message-bubble/message-bubble.compone
   styleUrls: ['./chat.component.scss'],
   standalone: true,
   providers: [SortPipe],
-  imports: [MessageBubbleComponent]
+  imports: [ CommonModule,MessageBubbleComponent, ImageBubbleComponent, AudioBubbleComponent]
 })
 export class ChatComponent  implements OnInit {
   contact = input<ContactModel>();
@@ -34,7 +37,7 @@ export class ChatComponent  implements OnInit {
   total = 0;
 
 
-  constructor() { 
+  constructor() {
     this.messagesList = computed(() => {
       return this.sortPipe.transform(this.messages(), 'asc', 'timestamp');
     });
@@ -51,6 +54,7 @@ export class ChatComponent  implements OnInit {
       this.messages.update(() => {
         return [...this.messages(), message];
       });
+
     });
   }
 
@@ -59,12 +63,12 @@ export class ChatComponent  implements OnInit {
       this.messages.update(() => {
         return [...this.messages(), ...messages];
       });
+      console.log(messages);
     });
   }
 
   loadMore() {
     this.skip += this.take;
-
     this.loadLocalHistory();
   }
 
