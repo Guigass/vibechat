@@ -209,7 +209,7 @@ export class ChatService {
         const messageId = message.attrs.id;
         const resultId = result.attrs.id;
 
-        console.log('messageId', messageId);
+        // console.log('messageId', messageId);
 
         return new MessageModel({
           from: from,
@@ -230,9 +230,9 @@ export class ChatService {
       filter(stanza => stanza.attrs.type === 'result'),
       filter(stanza => stanza.getChild('fin', 'urn:xmpp:mam:2') != null),
       map(stanza => {
-        return { 
-          complete: stanza.getChild('fin', 'urn:xmpp:mam:2').attr.complete, 
-          last: stanza.getChild('fin', 'urn:xmpp:mam:2').getChildText('set', 'http://jabber.org/protocol/rsm', 'last'), 
+        return {
+          complete: stanza.getChild('fin', 'urn:xmpp:mam:2').attr.complete,
+          last: stanza.getChild('fin', 'urn:xmpp:mam:2').getChildText('set', 'http://jabber.org/protocol/rsm', 'last'),
           first: stanza.getChild('fin', 'urn:xmpp:mam:2').getChildText('set', 'http://jabber.org/protocol/rsm', 'first')
         };
       }),
