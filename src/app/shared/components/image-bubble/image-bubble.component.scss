@@ -1,0 +1,25 @@
+#chat-container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+}
+
+.content {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  p {
+    padding: 0;
+    margin: 0;
+  }
+}
+.content.right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-direction: row-reverse;
+  p {
+    padding: 0;
+    margin: 0;
+  }
+}

@@ -1,3 +1,10 @@
-<div>
-  <ion-img src="messaga." alt=""></ion-img>
+<div id ="chat-container">
+  <div class="content">
+    <app-avatar></app-avatar>
+    <div class="bubble">
+      <ion-item button  (click)="openImage()">
+        <ion-img src= {{message()?.body}} ></ion-img>
+      </ion-item>
+    </div>
+  </div>
 </div>
