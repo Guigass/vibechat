@@ -10,6 +10,59 @@
     }
 }
 
+@media(prefers-color-scheme: light) {
+  .emoji-mart{
+    --background: white;
+  }
+}
+@media(prefers-color-scheme: light) {
+  .emoji-mart{
+    --background: black;
+  }
+}
+
 .hidden{
     display: none;
+}
+
+.bubble{
+  padding: 0;
+  border: solid 1px #ddd;
+  background: none;
+  margin-bottom: 0.25rem;
+  max-width: 40%;
+  align-self: flex-start;
+  border-radius: 0.75rem;
+  padding: 0.5rem 0.7rem;
+  position: relative;
+}
+
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 60%;
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-right-color: #eee;
+  border-left: 0;
+  border-top: 0;
+  margin-top: -6px;
+  margin-left: -12px;
+}
+
+.bubble.right::after {
+  content: "";
+  right: 0;
+  border: 12px solid transparent;
+  border-left-color: white;
+  border-right: 0;
+  border-top: 0;
+  margin-right: -12px;
+  left: initial;
+}
+
+ion-item{
+  --inner-border-width:  0 0 0 0;
 }
