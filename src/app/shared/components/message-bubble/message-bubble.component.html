@@ -4,24 +4,24 @@
       <app-avatar [user]="contact()"></app-avatar>
       <div class="bubble">
         <strong>
-          {{message()!.from}}
+          {{contact()!.name }}
         </strong>
         <p>
           {{message()!.body}}
         </p>
-        <p>{{message()!.timestamp | date: 'dd/MM/yyyy HH:mm:ss'}}</p>
+        <small>{{message()!.timestamp | date: 'dd/MM HH:mm'}}</small>
       </div>
     </div>
     <div class="content right" *ngIf="contact()?.jid === message()!.from">
       <app-avatar [user]="contact()"></app-avatar>
       <div class="bubble right">
         <strong>
-          {{message()!.from}}
+          {{contact()!.name }}
         </strong>
         <p>
           {{message()!.body}}
         </p>
-        <p>{{message()!.timestamp | date: 'dd/MM/yyyy HH:mm:ss'}}</p>
+        <small>{{message()!.timestamp | date: 'dd/MM HH:mm'}}</small>
       </div>
     </div>
 
