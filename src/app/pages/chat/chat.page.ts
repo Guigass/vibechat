@@ -87,9 +87,7 @@ export class ChatPage implements OnInit {
       happyOutline,
       folderOutline,
     });
-
   }
-
   ngOnInit() {
     const jidquery = this.route.snapshot.paramMap.get('jid');
     if (jidquery) {
@@ -116,6 +114,7 @@ export class ChatPage implements OnInit {
     this.chatRepository.sendMessage(msg.value, this.jid()).subscribe(() => {
       msg.value = '';
       msg.setFocus();
+      // console.log(msg);
     });
   }
 
@@ -128,10 +127,11 @@ export class ChatPage implements OnInit {
     this.file = evt;
 
     if (this.file && !this.file.id) {
+      this.txtaMsg.value +=  this.file.name;
       this.sharingService
         .shareFile(this.file, uuidv4())
         .subscribe((resp) => {
-          console.log('Ola', resp);
+            this.txtaMsg.value = resp.url;
         });
 
     }

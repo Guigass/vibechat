@@ -8,6 +8,7 @@
 
 ion-icon{
   font-size: 30px;
+
 }
 
 ion-avatar {
@@ -20,4 +21,9 @@ ion-avatar {
 cdk-virtual-scroll-viewport {
   height: 100%;
   width: 100%;
+}
+
+ion-item{
+  text-decoration: none;
+  --inner-border-width:  0 0 0 0;
 }
