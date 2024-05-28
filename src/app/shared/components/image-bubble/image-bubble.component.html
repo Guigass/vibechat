@@ -1,10 +1,22 @@
 <div id ="chat-container">
-  <div class="content">
-    <app-avatar></app-avatar>
-    <div class="bubble">
-      <ion-item button  (click)="openImage()">
-        <ion-img src= {{message()?.body}} ></ion-img>
-      </ion-item>
+  @if(contact()?.jid === message()!.to){
+    <div class="content" >
+      <app-avatar [user]="contact()"></app-avatar>
+      <div class="bubble">
+        <ion-item button  (click)="openImage()">
+          <ion-img src= {{message()?.body}} ></ion-img>
+        </ion-item>
+      </div>
+    </div>
+  }
+  @else if (contact()?.jid === message()!.from){
+    <div class="content right">
+      <app-avatar [user]="contact()" ></app-avatar>
+      <div class="bubble right">
+        <ion-item button  (click)="openImage()">
+          <ion-img src= {{message()?.body}} ></ion-img>
+        </ion-item>
     </div>
   </div>
+  }
 </div>

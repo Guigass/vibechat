@@ -13,7 +13,7 @@ import { ImageModalComponent } from './image-modal/image-modal.component';
     standalone: true,
     imports: [IonImg, IonItem, AvatarComponent]
 })
-export class ImageBubbleComponent  implements OnInit {
+export class ImageBubbleComponent{
 
 
 contact = input<ContactModel>();
@@ -23,7 +23,7 @@ message = input<MessageModel>();
     private modalCtrl: ModalController
   ) { }
 
-  ngOnInit() {}
+
   async openImage() {
       const modal = await this.modalCtrl.create({
           component: ImageModalComponent,
@@ -36,5 +36,4 @@ message = input<MessageModel>();
       })
       return await modal.present();
   }
-
 }
