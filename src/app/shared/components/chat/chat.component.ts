@@ -63,7 +63,6 @@ export class ChatComponent  implements OnInit {
       this.messages.update(() => {
         return [...this.messages(), ...messages];
       });
-      // console.log(messages);
     });
   }
 
