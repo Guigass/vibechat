@@ -3,7 +3,7 @@ import { Injectable, NgZone, inject } from '@angular/core';
 import { ChatService } from '../../services/chat/chat.service';
 import { from, Observable, Subject, concatMap, filter, merge, mergeMap, of, switchMap, take, tap, toArray, map, EMPTY, concat, share, BehaviorSubject, defer } from 'rxjs';
 import { XmppService } from '../../services/xmpp/xmpp.service';
-import { MessageModel } from '../../models/message.model';
+import { MessageModel, MessageProps } from '../../models/message.model';
 import { Database2Service } from '../../services/database/database2.service';
 import { v4 as uuidv4 } from 'uuid';
 import { liveQuery } from 'dexie';
@@ -55,7 +55,9 @@ export class ChatRepository {
         .limit(take)
         .reverse()
         .toArray()
-    ));
+    )).pipe(
+      map(messages => messages.map(message => new MessageModel(message as MessageProps)))
+    );
   }
 
   getMessagesChanges(id: number): Observable<any> {

@@ -27,7 +27,7 @@ export class MessageModel {
     }
 }
 
-interface MessageProps {
+export interface MessageProps {
     from: string;
     to: string;
     body: string;
@@ -36,4 +36,4 @@ interface MessageProps {
     ticked?: boolean;
     read?: boolean;
     resultId?: number;
-}
+  }
