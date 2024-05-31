@@ -49,8 +49,10 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.contactInfoSubscription = this.contactRepository.getContactInfoChanges(this.contact.jid).subscribe(contactInfo => {
-      this.contactInfo = contactInfo!;
-      this.cdr.markForCheck();
+      if (contactInfo) {
+        this.contactInfo = contactInfo;
+        this.cdr.detectChanges();
+      }
     });
   }
 

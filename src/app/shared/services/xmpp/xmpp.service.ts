@@ -34,7 +34,6 @@ export class XmppService {
   public isConnected = false;
 
   connect(service: string, domain: string, username: string, password: string) {
-    console.log(username)
     if (this.xmpp && this.xmpp.status !== 'offline') {
       return of();
     }
