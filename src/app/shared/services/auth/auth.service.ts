@@ -5,7 +5,10 @@ import { LoginModel } from '../../models/login.model';
 import { PreferencesKey } from '../../enums/preferences.enum';
 import { WebStorageService } from '../web-storage/web-storage.service';
 import { StorageType } from '../../enums/storage-type.enum';
-import { DatabaseService } from '../database/database.service';
+import { VCardModel } from '../../models/vcard.model';
+import { xml } from '@xmpp/client-core';
+import { v4 as uuidv4 } from 'uuid';
+
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +21,9 @@ export class AuthService {
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
 
   public jid = signal('');
+
+  private userInfo: BehaviorSubject<VCardModel> = new BehaviorSubject<VCardModel>({ jid: '', fullname: '', nickname: '', email: '', phone: '', givenName: '', familyName: '', avatar: '', updatedAt: new Date() });
+  public userInfo$ = this.userInfo.asObservable();
 
   constructor() {}
 
@@ -34,6 +40,9 @@ export class AuthService {
         }
         
         this.jid.set(`${logged.local}@${logged.domain}`);
+
+        this.initializeUserInfo();
+
         this.isAuthenticatedSubject.next(true);
         return of(true);
       }),
@@ -58,6 +67,24 @@ export class AuthService {
     }
 
     return of(false);
+  }
+
+  private initializeUserInfo(): void {
+    this.xmppService.sendIq(xml('iq', { type: 'get', id: uuidv4(), to: this.jid() }, xml('vCard', { xmlns: 'vcard-temp' }))).subscribe((stanza: any) => {
+      var ui = {
+        jid: this.jid(),
+        fullname: stanza.getChild('vCard')?.getChild('FN')?.text(),
+        nickname: stanza.getChild('vCard')?.getChild('NICKNAME')?.text(),
+        email: stanza.getChild('vCard')?.getChild('EMAIL')?.getChild('USERID')?.text(),
+        phone: stanza.getChild('vCard')?.getChild('TEL')?.getChild('NUMBER')?.text(),
+        givenName: stanza.getChild('vCard')?.getChild('N')?.getChild('GIVEN')?.text(),
+        familyName: stanza.getChild('vCard')?.getChild('N')?.getChild('FAMILY')?.text(),
+        avatar: stanza.getChild('vCard')?.getChild('PHOTO')?.getChild('BINVAL')?.text(),
+        updatedAt: new Date()
+      };
+
+      this.userInfo.next(ui);
+    });
   }
 
   logout(): void {

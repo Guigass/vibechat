@@ -9,6 +9,7 @@ import { DataPipe } from '../../pipes/data/data.pipe';
 import { ContactRepository } from '../../repositories/contact/contact.repository';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { VCardModel } from '../../models/vcard.model';
+import { ChatService } from '../../services/chat/chat.service';
 
 @Component({
   selector: 'app-roster-contact-item',
@@ -36,6 +37,7 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   private contactRepository = inject(ContactRepository);
+  private chatService = inject(ChatService);
 
   private contactInfoSubscription!: Subscription;
 
@@ -43,6 +45,8 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
 
   unreadMessages = 0;
   lastMessage!: MessageModel | null;
+
+  isTyping = false;
 
   constructor() {
   }
@@ -53,6 +57,11 @@ export class RosterContactItemComponent implements OnInit, OnDestroy {
         this.contactInfo = contactInfo;
         this.cdr.detectChanges();
       }
+    });
+
+    this.chatService.isUserTyping(this.contact.jid).subscribe(isTyping => {
+      this.isTyping = isTyping;
+      this.cdr.detectChanges();
     });
   }
 

@@ -25,7 +25,17 @@
     <ion-item button ngfSelect [(files)]="file" accept="image/*" (fileChange)="sendFile($event)">
       <ion-icon name="folder-outline"></ion-icon>
     </ion-item>
-    <ion-textarea [clearOnEdit]="true" class="custom" type="text" placeholder="Mensagem" #txtaMsg> </ion-textarea>
+    <ion-textarea 
+        [clearOnEdit]="true" 
+        class="custom" 
+        type="text" 
+        placeholder="Mensagem" 
+        #txtaMsg 
+        appDebounceKeyUp 
+        [debounceTime]="1500"
+        (debounceEvent)="userTyping(false)"
+        (keypress)="userTyping(true)">
+    </ion-textarea>
     <ion-item button (click)="sendMessage(txtaMsg)"><ion-icon name="send"></ion-icon>
     </ion-item>
   </ion-item>

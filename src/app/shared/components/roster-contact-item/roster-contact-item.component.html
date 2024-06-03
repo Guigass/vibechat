@@ -7,7 +7,7 @@
     <!-- <small [title]="lastMessage.body" *ngIf="lastMessage && !contact.isTyping">
       {{lastMessage.timestamp | data}} - <strong *ngIf="lastMessage.from === xmpp.jid">Você:</strong> {{lastMessage.body}}
     </small> -->
-    <small *ngIf="contact.isTyping">Está digitando...</small>
+    <small *ngIf="isTyping">Está digitando...</small>
   </div>
   <ion-badge *ngIf="unreadMessages > 0" title="Mensagens não lidas" slot="end">{{unreadMessages}}</ion-badge>
 </ion-item>

@@ -1,15 +1,15 @@
 <button (click)="loadMore()">More</button>
 <div>
-    @for(msg of messagesList(); track msg.id){
-      @if (msg.contentType === 'text'){
-        <app-message-bubble [message]="msg" [contact]="contact()"></app-message-bubble>
-      }
-      @else if (msg.contentType === 'image'){
-        <app-image-bubble [message]="msg"  [contact]="contact()"></app-image-bubble>
-      }
-      @else if (msg.contentType === 'audio'){
-       <p>audio</p>
-      }
+  <ng-container *ngFor="let msg of messagesList()">
+    @if (msg.contentType === 'text'){
+      <app-message-bubble [message]="msg" [contact]="contact()"></app-message-bubble>
     }
+    @else if (msg.contentType === 'image'){
+      <app-image-bubble [message]="msg"  [contact]="contact()"></app-image-bubble>
+    }
+    @else if (msg.contentType === 'audio'){
+     <p>audio</p>
+    }
+  </ng-container>
 </div>
 

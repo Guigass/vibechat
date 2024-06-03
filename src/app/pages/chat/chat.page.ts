@@ -33,6 +33,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { SortPipe } from 'src/app/shared/pipes/sort/sort.pipe';
 import { VCardModel } from 'src/app/shared/models/vcard.model';
 import { ChatComponent } from 'src/app/shared/components/chat/chat.component';
+import { ChatService } from 'src/app/shared/services/chat/chat.service';
+import { DebounceKeyUpDirective } from 'src/app/shared/directives/debounces/debounce-key-up.directive';
 
 
 @Component({
@@ -58,13 +60,15 @@ import { ChatComponent } from 'src/app/shared/components/chat/chat.component';
     AvatarComponent,
     PickerComponent,
     ngfModule,
-    ChatComponent
+    ChatComponent,
+    DebounceKeyUpDirective
   ],
 })
 export class ChatPage implements OnInit {
   private route = inject(ActivatedRoute);
   private navCtrl = inject(NavController);
   private contactRepository = inject(ContactRepository);
+  private chatService = inject(ChatService);
   private chatRepository = inject(ChatRepository);
   private sharingService = inject(SharingService);
 
@@ -78,6 +82,8 @@ export class ChatPage implements OnInit {
   file: any;
   emoji: any;
   showEmoji = false;
+
+  isTyping = false;
 
   constructor() {
     this.navCtrl.setDirection('root');
@@ -139,5 +145,14 @@ export class ChatPage implements OnInit {
 
   openEmoji() {
     this.showEmoji = this.showEmoji ? false : true;
+  }
+
+  userTyping(state: boolean){
+    if (state && this.isTyping) {
+      return;
+    }
+
+    this.isTyping = state;
+    this.chatService.setTyping(this.jid(), state).subscribe();
   }
 }
